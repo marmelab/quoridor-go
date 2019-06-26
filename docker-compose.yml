@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./src/quoridor:/go/src/quoridor
+      - ./test/quoridor:/go/test/quoridor
+    command: go run /go/src/quoridor/main.go
+    working_dir: /go
+    ports:
+      - "8383:8383"
