@@ -22,6 +22,7 @@ func Start() {
 	router.HandleFunc("/", welcomeHandler).Methods("GET")
 	router.HandleFunc("/games", createGameHandler).Methods("POST")
 	router.HandleFunc("/games/{gameId}", getGameHandler).Methods("GET")
+	router.HandleFunc("/games/{gameId}/add-fence", addFenceHandler).Methods("PUT")
 	port := getListeningPort()
 	fmt.Printf("Server started on port: %v\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
@@ -29,35 +30,6 @@ func Start() {
 
 func getListeningPort() string {
 	return strconv.Itoa(Port)
-}
-
-func welcomeHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
-	w.Write([]byte(`{"message": "Welcome to the Quoridor API!"}`))
-}
-
-func createGameHandler(w http.ResponseWriter, r *http.Request) {
-	configuration, err := getConfiguration(r)
-	if err != nil {
-		send400Error(w, err)
-	}
-	newGame, err := game.CreateGame(configuration)
-	if err != nil {
-		send400Error(w, err)
-	} else {
-		sendResponse(w, newGame)
-	}
-}
-
-func getGameHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["gameId"]
-	game, err := game.GetGame(id)
-	if err != nil {
-		send400Error(w, err)
-	} else {
-		sendResponse(w, game)
-	}
 }
 
 func sendResponse(w http.ResponseWriter, response interface{}) {
@@ -69,12 +41,17 @@ func sendResponse(w http.ResponseWriter, response interface{}) {
 	w.Write([]byte(string(encodedResponse)))
 }
 
-func send400Error(w http.ResponseWriter, err error) {
-	send400Response(w, err.Error())
+func sendBadRequestError(w http.ResponseWriter, err error) {
+	sendBadRequestResponse(w, err.Error())
 }
 
-func send400Response(w http.ResponseWriter, message string) {
+func sendBadRequestResponse(w http.ResponseWriter, message string) {
 	http.Error(w, "{ \"message\": \"" + message + "\"}", http.StatusBadRequest)
+}
+
+func getGameID(r *http.Request) string {
+	vars := mux.Vars(r)
+	return vars["gameId"]
 }
 
 func getConfiguration(r *http.Request) (*game.Configuration, error) {
@@ -88,4 +65,59 @@ func getConfiguration(r *http.Request) (*game.Configuration, error) {
 		return nil, err
 	}
 	return &conf, nil
+}
+
+func getFence(r *http.Request) (game.Fence, error) {
+	decoder := json.NewDecoder(r.Body)
+	defer r.Body.Close()
+	var fence game.Fence
+	err := decoder.Decode(&fence)
+	if err != nil {
+		return game.Fence{}, err
+	}
+	return fence, nil
+}
+
+func welcomeHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("content-type", "application/json")
+	w.Write([]byte(`{"message": "Welcome to the Quoridor API!"}`))
+}
+
+func createGameHandler(w http.ResponseWriter, r *http.Request) {
+	configuration, err := getConfiguration(r)
+	if err != nil {
+		sendBadRequestError(w, err)
+		return
+	}
+	newGame, err := game.CreateGame(configuration)
+	if err != nil {
+		sendBadRequestError(w, err)
+		return
+	}
+	sendResponse(w, newGame)
+}
+
+func getGameHandler(w http.ResponseWriter, r *http.Request) {
+	id := getGameID(r)
+	game, err := game.GetGame(id)
+	if err != nil {
+		sendBadRequestError(w, err)
+	} else {
+		sendResponse(w, game)
+	}
+}
+
+func addFenceHandler(w http.ResponseWriter, r *http.Request) {
+	id := getGameID(r)
+	fence, err := getFence(r)
+	if err != nil {
+		sendBadRequestError(w, err)
+		return
+	}
+	game, err := game.AddFence(id, fence)
+	if err != nil {
+		sendBadRequestError(w, err)
+		return
+	}
+	sendResponse(w, game)
 }

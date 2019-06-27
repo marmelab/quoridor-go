@@ -6,7 +6,7 @@ import (
 
 //Board game board 
 type Board struct {
-	BoardSize int `json:"board-size"`
+	BoardSize int `json:"boardSize"`
 	Squares []Position `json:"squares"`
 }
 
