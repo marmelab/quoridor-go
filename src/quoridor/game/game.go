@@ -2,13 +2,14 @@ package game
 
 import (
 	"errors"
-	"math/rand"
 
 	"quoridor/storage"
+
+	"github.com/lithammer/shortuuid"
 )
 
 type Game struct {
-	Id    int
+	Id    string
 	Pawn  Pawn  `json:"pawn"`
 	Board Board `json:"-"`
 }
@@ -23,7 +24,8 @@ func CreateGame(conf Configuration) (*Game, error) {
 	lineCenter := (conf.BoardSize - 1) / 2
 	pawn := Pawn{Position{0, lineCenter}}
 	board := Board{conf.BoardSize}
-	game := Game{rand.Int(), pawn, board}
+	id:= shortuuid.New()
+	game := Game{id, pawn, board}
 	storage.Set(game.Id, game)
 	return &game, nil
 }

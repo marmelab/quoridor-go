@@ -3,7 +3,12 @@ package game
 import (
 	"testing"
 	"quoridor/game"
+	"quoridor/storage"
 )
+
+func setUp() {
+	storage.Init()
+}
 
 func TestCreateGame(t *testing.T) {
 	//Given
@@ -11,7 +16,7 @@ func TestCreateGame(t *testing.T) {
 	//When
 	newGame, _ := game.CreateGame(configuration)
 	//Then
-	if newGame.Id == 0 {
+	if newGame.Id == "" {
 		t.Error("create a game should define an id")
 	}
 }
