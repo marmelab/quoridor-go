@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -74,7 +73,7 @@ func getConfiguration(r *http.Request) (*game.Configuration, error) {
 	if err == io.EOF {
 		conf = game.Configuration{9}
 	} else if err != nil {
-		return nil, errors.New(err.Error())
+		return nil, err
 	}
 	return &conf, nil
 }
