@@ -12,6 +12,7 @@ func setUp() {
 
 func TestCreateGame(t *testing.T) {
 	//Given
+	setUp()
 	configuration := game.Configuration{9}
 	//When
 	newGame, _ := game.CreateGame(configuration)
@@ -23,6 +24,7 @@ func TestCreateGame(t *testing.T) {
 
 func TestCreateGameShouldNotBePossibleWithEvenNumber(t *testing.T) {
 	//Given
+	setUp()
 	configuration := game.Configuration{8}
 	//When
 	_, err := game.CreateGame(configuration)
@@ -34,6 +36,7 @@ func TestCreateGameShouldNotBePossibleWithEvenNumber(t *testing.T) {
 
 func TestCreateGameShouldNotBePossibleWithLessThanThree(t *testing.T) {
 	//Given
+	setUp()
 	configuration := game.Configuration{1}
 	//When
 	_, err := game.CreateGame(configuration)
