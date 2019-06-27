@@ -6,6 +6,7 @@ help:
 install: ## Install docker environnement
 	docker-compose build
 	docker-compose run api go get github.com/gorilla/mux
+	docker-compose run api go get github.com/patrickmn/go-cache
 
 start: ## Start the server
 	docker-compose up
