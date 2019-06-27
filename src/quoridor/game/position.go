@@ -1,5 +1,6 @@
 package game
 
+//Position position on the board
 type Position struct {
 	Column int `json:"column"`
 	Row    int `json:"row"`
