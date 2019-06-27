@@ -1,6 +1,8 @@
 package game
 
 import (
+	"errors"
+
 	"quoridor/storage"
 
 	"github.com/lithammer/shortuuid"
@@ -26,4 +28,13 @@ func CreateGame(conf *Configuration) (*Game, error) {
 	game := Game{id, pawn, board}
 	storage.Set(game.Id, game)
 	return &game, nil
+}
+
+// GetGame get the game via its identifier
+func GetGame(id string) (Game, error) {
+	game, found := storage.Get(id)
+	if !found {
+		return Game{}, errors.New("The game does not exist")
+	}
+	return game.(Game), nil
 }

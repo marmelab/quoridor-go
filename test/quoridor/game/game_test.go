@@ -45,3 +45,27 @@ func TestCreateGameShouldNotBePossibleWithLessThanThree(t *testing.T) {
 		t.Error("The size must be at least 3")
 	}
 }
+
+func TestGetGameShouldRetrieveAnExistingGame(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{9}
+	newGame, _ := game.CreateGame(&configuration)
+	//When
+	getGame, _ := game.GetGame(newGame.Id)
+	//Then
+	if newGame.Id != getGame.Id {
+		t.Error("Games are not the same")
+	}
+}
+
+func TestGetGameShouldRaiseAnExceptionWithAnUnknownGame(t *testing.T) {
+	//Given
+	setUp()
+	//When
+	_, err := game.GetGame("12453po")
+	//Then
+	if err == nil {
+		t.Error("the game does not exists, an error should be raised")
+	}
+}

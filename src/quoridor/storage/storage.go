@@ -13,3 +13,7 @@ func Init() {
 func Set(id string, value interface{}) {
 	c.Set(id, value, cache.NoExpiration)
 }
+
+func Get(id string) (interface{}, bool) {
+	return c.Get(id)
+}

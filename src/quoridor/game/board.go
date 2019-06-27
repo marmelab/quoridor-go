@@ -6,7 +6,8 @@ import (
 
 //Board game board 
 type Board struct {
-	BoardSize int
+	BoardSize int `json:"board-size"`
+	Squares []Position `json:"squares"`
 }
 
 func NewBoard(boardSize int) (*Board, error) {
@@ -14,7 +15,13 @@ func NewBoard(boardSize int) (*Board, error) {
 		return nil, errors.New("The board size must be an odd number")
 	}
 	if boardSize < 3 {
-		return nil, errors.New("The board size must be at least 3");
+		return nil, errors.New("The board size must be at least 3")
 	}
-	return &Board{boardSize}, nil
+	squares := []Position{}
+	for row := 0; row < boardSize; row++ {
+		for column := 0; column < boardSize; column++ {
+			squares = append(squares, Position{column, row})
+		}
+	}
+	return &Board{boardSize, squares}, nil
 }
