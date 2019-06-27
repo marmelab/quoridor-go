@@ -36,8 +36,12 @@ func welcome(w http.ResponseWriter, r *http.Request) {
 
 func createGame(w http.ResponseWriter, r *http.Request) {
 	configuration := getConfiguration(r)
-	newGame := game.CreateGame(configuration)
-	sendResponse(w, newGame)
+	newGame, err := game.CreateGame(configuration)
+	if err != nil {
+		send400Response(w, err)
+	} else {
+		sendResponse(w, newGame)
+	}
 }
 
 func sendResponse(w http.ResponseWriter, response interface{}) {
@@ -47,6 +51,10 @@ func sendResponse(w http.ResponseWriter, response interface{}) {
 	}
 	w.Header().Set("content-type", "application/json")
 	w.Write([]byte(string(encodedResponse)))
+}
+
+func send400Response(w http.ResponseWriter, err error) {
+	http.Error(w, "{ \"message\": \"" + err.Error() + "\"}", http.StatusBadRequest)
 }
 
 func getConfiguration(r *http.Request) game.Configuration {
