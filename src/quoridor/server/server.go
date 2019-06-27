@@ -21,7 +21,7 @@ func Start() {
 	router.HandleFunc("/", welcome).Methods("GET")
 	router.HandleFunc("/games", createGame).Methods("POST")
 	port := getListeningPort()
-	fmt.Println("Server started on port : " + port)
+	fmt.Printf("Server started on port: %v\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }
 
