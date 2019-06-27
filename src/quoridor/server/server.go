@@ -21,6 +21,7 @@ func Start() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", welcomeHandler).Methods("GET")
 	router.HandleFunc("/games", createGameHandler).Methods("POST")
+	router.HandleFunc("/games/{gameId}", getGameHandler).Methods("GET")
 	port := getListeningPort()
 	fmt.Printf("Server started on port: %v\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
@@ -45,6 +46,17 @@ func createGameHandler(w http.ResponseWriter, r *http.Request) {
 		send400Error(w, err)
 	} else {
 		sendResponse(w, newGame)
+	}
+}
+
+func getGameHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["gameId"]
+	game, err := game.GetGame(id)
+	if err != nil {
+		send400Error(w, err)
+	} else {
+		sendResponse(w, game)
 	}
 }
 
