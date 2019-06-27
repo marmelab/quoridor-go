@@ -17,7 +17,7 @@ func TestCreateGame(t *testing.T) {
 	//When
 	newGame, _ := game.CreateGame(&configuration)
 	//Then
-	if newGame.Id == "" {
+	if newGame.ID == "" {
 		t.Error("create a game should define an id")
 	}
 }
@@ -52,9 +52,9 @@ func TestGetGameShouldRetrieveAnExistingGame(t *testing.T) {
 	configuration := game.Configuration{9}
 	newGame, _ := game.CreateGame(&configuration)
 	//When
-	getGame, _ := game.GetGame(newGame.Id)
+	getGame, _ := game.GetGame(newGame.ID)
 	//Then
-	if newGame.Id != getGame.Id {
+	if newGame.ID != getGame.ID {
 		t.Error("Games are not the same")
 	}
 }

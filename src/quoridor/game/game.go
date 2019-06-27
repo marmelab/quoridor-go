@@ -48,7 +48,6 @@ func (g Game) addFenceIfCrossable(fence Fence, edge1 Edge, edge2 Edge) error {
 		return errors.New("No more access to goal line")
 	}
 	g.Fences = append(g.Fences, fence)
-	storage.Set(g.ID, g)
 	return nil
 }
 
@@ -121,5 +120,6 @@ func AddFence(id string, fence Fence) (Game, error) {
 	if errFence != nil {
 		return Game{}, errFence
 	}
+	storage.Set(game.ID, game)
 	return game, nil
 }
