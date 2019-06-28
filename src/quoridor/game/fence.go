@@ -6,18 +6,8 @@ type Fence struct {
 	Horizontal bool `json:horizontal`
 }
 
-type FenceBlock struct {
-	NWSquare Position
-	NESquare Position
-	SWSquare Position
-	SESquare Position   
-}
-
-func NewFenceBlock(nwSquare Position) FenceBlock {
-	neSquare := nwSquare.Copy(1, 0)
-	swSquare := nwSquare.Copy(0, 1)
-	seSquare := nwSquare.Copy(1, 1)
-	return FenceBlock{nwSquare, neSquare, swSquare, seSquare}
+func (f Fence) Equals(other Fence) bool {
+	return f.NWSquare.Equals(other.NWSquare) && f.Horizontal == other.Horizontal
 }
 
 type PositionSquare struct {
@@ -28,14 +18,9 @@ type PositionSquare struct {
 }
 
 func NewPositionSquare(center Position) PositionSquare {
-	northPosition := center.Copy(0, -1);
-	eastPosition := center.Copy(1, 0);
-	southPosition := center.Copy(0, 1);
-	westPosition := center.Copy(-1, 0);
+	northPosition := center.Copy(0, -1)
+	eastPosition := center.Copy(1, 0)
+	southPosition := center.Copy(0, 1)
+	westPosition := center.Copy(-1, 0)
 	return PositionSquare{northPosition, eastPosition, southPosition, westPosition}
-}
-
-type Edge struct {
-	First Position
-    Second Position
 }

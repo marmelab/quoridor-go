@@ -6,12 +6,14 @@ type Position struct {
 	Row    int `json:"row"`
 }
 
-func (p Position) translateColumn(deltaColumn int) {
+func (p Position) translateColumn(deltaColumn int) Position {
 	p.Column += deltaColumn
+	return p
 }
 
-func (p Position) translateRow(deltaRow int) {
+func (p Position) translateRow(deltaRow int) Position {
 	p.Row += deltaRow
+	return p
 }
 
 func (p Position) Equals(other Position) bool {
@@ -20,7 +22,7 @@ func (p Position) Equals(other Position) bool {
 
 func (p Position) Copy(deltaColumn int, deltaRow int) Position {
 	copy := Position{p.Column, p.Row}
-	copy.translateColumn(deltaColumn)
-	copy.translateRow(deltaRow)
+	copy = copy.translateColumn(deltaColumn)
+	copy = copy.translateRow(deltaRow)
 	return copy
 }
