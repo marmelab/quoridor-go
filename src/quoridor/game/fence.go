@@ -36,6 +36,6 @@ func NewPositionSquare(center Position) PositionSquare {
 }
 
 type Edge struct {
-	first Position
-    second Position
+	First Position
+    Second Position
 }

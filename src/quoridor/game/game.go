@@ -2,10 +2,6 @@ package game
 
 import (
 	"errors"
-
-	"quoridor/storage"
-
-	"github.com/lithammer/shortuuid"
 )
 
 // Game is the controller  
@@ -17,17 +13,20 @@ type Game struct {
 }
 
 //AddFence add the fence on the board
-func (g Game) AddFence(fence Fence) error {
+func (g Game) AddFence(fence Fence) (Game, error) {
 	positionSquare := NewPositionSquare(fence.NWSquare)
 	if g.hasAlreadyAFenceAtTheSamePosition(fence.NWSquare) || g.hasNeighbourFence(fence.Horizontal, positionSquare) {
-		return errors.New("The fence overlaps another one")
+		return Game{}, errors.New("The fence overlaps another one")
 	}
 	fenceBlock := NewFenceBlock(fence.NWSquare)
-	g.addFenceWithEdges(fence, fenceBlock)
-	return nil
+	g, err :=g.addFenceWithEdges(fence, fenceBlock)
+	if err != nil {
+		return Game{}, err
+	}
+	return g, nil
 }
 
-func (g Game) addFenceWithEdges(fence Fence, fenceBlock FenceBlock) error {
+func (g Game) addFenceWithEdges(fence Fence, fenceBlock FenceBlock) (Game, error) {
 	var firstEdge, secondEdge Edge 
 	if fence.Horizontal {
 		firstEdge = Edge{fenceBlock.NWSquare, fenceBlock.SWSquare} //westEdge
@@ -36,19 +35,19 @@ func (g Game) addFenceWithEdges(fence Fence, fenceBlock FenceBlock) error {
 		firstEdge = Edge{fenceBlock.NWSquare, fenceBlock.NESquare} //northEdge
 		secondEdge = Edge{fenceBlock.SWSquare, fenceBlock.SESquare} //southEdge
 	}
-	err := g.addFenceIfCrossable(fence, firstEdge, secondEdge)
+	g, err := g.addFenceIfCrossable(fence, firstEdge, secondEdge)
 	if err != nil {
-		return err
+		return Game{}, err
 	}
-	return nil
+	return g, nil
 }
 
-func (g Game) addFenceIfCrossable(fence Fence, edge1 Edge, edge2 Edge) error {
+func (g Game) addFenceIfCrossable(fence Fence, edge1 Edge, edge2 Edge) (Game, error) {
 	if !g.isCrossableForAllPawns() {
-		return errors.New("No more access to goal line")
+		return Game{}, errors.New("No more access to goal line")
 	}
 	g.Fences = append(g.Fences, fence)
-	return nil
+	return g, nil
 }
 
 func (g Game) hasAlreadyAFenceAtTheSamePosition(p Position) bool {
@@ -86,40 +85,6 @@ func (g Game) isCrossableForAllPawns() bool {
 	return true
 }
 
-// CreateGame create a game with the default configuration
-func CreateGame(conf *Configuration) (*Game, error) {
-	boardSize := conf.BoardSize
-	board, err := NewBoard(boardSize)
-	if err != nil {
-		return nil, err
-	}
-	lineCenter := (boardSize - 1) / 2
-	pawn := Pawn{Position{0, lineCenter}}	
-	id:= shortuuid.New()
-	game := Game{id, pawn, []Fence{}, board}
-	storage.Set(game.ID, game)
-	return &game, nil
-}
-
-// GetGame get the game via its identifier
-func GetGame(id string) (Game, error) {
-	game, found := storage.Get(id)
-	if !found {
-		return Game{}, errors.New("The game does not exist")
-	}
-	return game.(Game), nil
-}
-
-//AddFence add the fence on the board
-func AddFence(id string, fence Fence) (Game, error) {
-	game, err := GetGame(id)
-	if err != nil {
-		return Game{}, err
-	}
-	errFence := game.AddFence(fence)
-	if errFence != nil {
-		return Game{}, errFence
-	}
-	storage.Set(game.ID, game)
-	return game, nil
+func (g Game) isCrossable(pawn Pawn) bool {
+	return true
 }

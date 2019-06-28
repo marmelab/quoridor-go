@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"quoridor/game"
+	"quoridor/service"
 
 	"github.com/gorilla/mux"
 )
@@ -89,17 +90,17 @@ func createGameHandler(w http.ResponseWriter, r *http.Request) {
 		sendBadRequestError(w, err)
 		return
 	}
-	newGame, err := game.CreateGame(configuration)
+	game, err := service.CreateGame(configuration)
 	if err != nil {
 		sendBadRequestError(w, err)
 		return
 	}
-	sendResponse(w, newGame)
+	sendResponse(w, game)
 }
 
 func getGameHandler(w http.ResponseWriter, r *http.Request) {
 	id := getGameID(r)
-	game, err := game.GetGame(id)
+	game, err := service.GetGame(id)
 	if err != nil {
 		sendBadRequestError(w, err)
 	} else {
@@ -114,7 +115,7 @@ func addFenceHandler(w http.ResponseWriter, r *http.Request) {
 		sendBadRequestError(w, err)
 		return
 	}
-	game, err := game.AddFence(id, fence)
+	game, err := service.AddFence(id, fence)
 	if err != nil {
 		sendBadRequestError(w, err)
 		return
