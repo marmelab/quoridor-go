@@ -21,7 +21,7 @@ func (fences Fences) IndexOf(e Fence) int {
 	return -1
 }
 
-func (fences Fences) RemoveF(e Fence) Fences {
+func (fences Fences) RemoveFence(e Fence) Fences {
 	index := fences.IndexOf(e)
 	if (index > -1) {
 		return fences.Remove(index)

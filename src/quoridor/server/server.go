@@ -27,7 +27,7 @@ func Start() {
 	router.HandleFunc("/games", createGameHandler).Methods("POST")
 	router.HandleFunc("/games/{gameId}", getGameHandler).Methods("GET")
 	router.HandleFunc("/games/{gameId}/add-fence", addFenceHandler).Methods("PUT")
-	router.HandleFunc("/games/{gameId}/add-fence/possibilities", addFencePossibilitiesHandler).Methods("GET")
+	router.HandleFunc("/games/{gameId}/add-fence/possibilities", getFencePossibilitiesHandler).Methods("GET")
 	port := getListeningPort()
 	fmt.Printf("Server started on port: %v\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
@@ -80,9 +80,9 @@ func addFenceHandler(w http.ResponseWriter, r *http.Request) {
 	response.SendOK(w, game)
 }
 
-func addFencePossibilitiesHandler(w http.ResponseWriter, r *http.Request) {
+func getFencePossibilitiesHandler(w http.ResponseWriter, r *http.Request) {
 	id := request.GetGameID(r)
-	possibilities, err := gamecontroller.AddFencePossibilities(id)
+	possibilities, err := gamecontroller.GetFencePossibilities(id)
 	if err != nil {
 		response.SendBadRequestError(w, err)
 		return

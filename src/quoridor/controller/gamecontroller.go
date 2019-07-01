@@ -49,7 +49,7 @@ func AddFence(id string, fence game.Fence) (game.Game, error) {
 
 
 //AddFencePossibilities get all the possibiles places where to add a fence
-func AddFencePossibilities(id string) ([]game.Fence, error) {
+func GetFencePossibilities(id string) ([]game.Fence, error) {
 	g, err := GetGame(id)
 	if err != nil {
 		return []game.Fence{}, err
@@ -78,26 +78,26 @@ func removeFences(allPossibilities []game.Fence, g game.Game) game.Fences {
 	fences = g.Fences
 	for _, element := range allPossibilities {
 		if fences.IndexOf(element) > -1 {
-			possibilities = possibilities.RemoveF(element)
+			possibilities = possibilities.RemoveFence(element)
 			positionSquare := game.NewPositionSquare(element.NWSquare)
 			if element.Horizontal {
 				rightFence := game.Fence{positionSquare.WestPosition, true}
-				possibilities = possibilities.RemoveF(rightFence)
+				possibilities = possibilities.RemoveFence(rightFence)
 				leftFence := game.Fence{positionSquare.EastPosition, true}
-				possibilities = possibilities.RemoveF(leftFence)
+				possibilities = possibilities.RemoveFence(leftFence)
 				oppositeFence := game.Fence{element.NWSquare, false}
-				possibilities = possibilities.RemoveF(oppositeFence)
+				possibilities = possibilities.RemoveFence(oppositeFence)
 			} else {
 				upFence := game.Fence{positionSquare.NorthPosition, false}
-				possibilities = possibilities.RemoveF(upFence)
+				possibilities = possibilities.RemoveFence(upFence)
 				downFence := game.Fence{positionSquare.SouthPosition, false}
-				possibilities = possibilities.RemoveF(downFence)
+				possibilities = possibilities.RemoveFence(downFence)
 				oppositeFence := game.Fence{element.NWSquare, true}
-				possibilities = possibilities.RemoveF(oppositeFence)
+				possibilities = possibilities.RemoveFence(oppositeFence)
 			}
 		} else {
 			if (!g.IsCrossable(element)) {
-				possibilities = possibilities.RemoveF(element)
+				possibilities = possibilities.RemoveFence(element)
 			}
 		}
 	}
