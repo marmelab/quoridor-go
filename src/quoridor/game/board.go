@@ -6,7 +6,7 @@ import (
 
 //Board game board 
 type Board struct {
-	BoardSize int `json:"board-size"`
+	BoardSize int `json:"boardSize"`
 	Squares []Position `json:"squares"`
 }
 
@@ -24,4 +24,10 @@ func NewBoard(boardSize int) (*Board, error) {
 		}
 	}
 	return &Board{boardSize, squares}, nil
+}
+
+func (board Board) IsInBoard(position Position) bool { 
+    row := position.Row
+    col := position.Column
+    return row >= 0 && row < board.BoardSize && col >= 0 && col < board.BoardSize; 
 }

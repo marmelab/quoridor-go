@@ -2,39 +2,74 @@ package game
 
 import (
 	"errors"
-
-	"quoridor/storage"
-
-	"github.com/lithammer/shortuuid"
 )
 
 // Game is the controller  
 type Game struct {
-	Id    string
+	ID    string `json:"id"`
 	Pawn  Pawn  `json:"pawn"`
+	Fences []Fence `json:"fences"`
 	Board *Board `json:"board"`
 }
 
-// CreateGame create a game with the default configuration
-func CreateGame(conf *Configuration) (*Game, error) {
-	boardSize := conf.BoardSize
-	board, err := NewBoard(boardSize)
-	if err != nil {
-		return nil, err
+//AddFence add the fence on the board
+func (g Game) AddFence(fence Fence) (Game, error) {
+	positionSquare := NewPositionSquare(fence.NWSquare)
+	if g.hasAlreadyAFenceAtTheSamePosition(fence.NWSquare) || g.hasNeighbourFence(fence.Horizontal, positionSquare) {
+		return Game{}, errors.New("The fence overlaps another one")
 	}
-	lineCenter := (boardSize - 1) / 2
-	pawn := Pawn{Position{0, lineCenter}}	
-	id:= shortuuid.New()
-	game := Game{id, pawn, board}
-	storage.Set(game.Id, game)
-	return &game, nil
+	g, err := g.addFenceIfCrossable(fence)
+	if err != nil {
+		return Game{}, err
+	}
+	return g, nil
 }
 
-// GetGame get the game via its identifier
-func GetGame(id string) (Game, error) {
-	game, found := storage.Get(id)
-	if !found {
-		return Game{}, errors.New("The game does not exist")
+func (g Game) addFenceIfCrossable(fence Fence) (Game, error) {
+	if !g.isCrossable(fence) {
+		return Game{}, errors.New("No more access to goal line")
 	}
-	return game.(Game), nil
+	g.Fences = append(g.Fences, fence)
+	return g, nil
+}
+
+func (g Game) hasAlreadyAFenceAtTheSamePosition(p Position) bool {
+	for i := range g.Fences {
+		pos := g.Fences[i].NWSquare
+		if pos.Equals(p) {
+			return true
+		}
+	}
+	return false
+}
+
+func (g Game) hasNeighbourFence(isHorizontal bool, ps PositionSquare) bool {
+	if (isHorizontal) {
+		for i := range g.Fences {
+			fence := g.Fences[i]
+			pos := fence.NWSquare
+			if fence.Horizontal && (pos.Equals(ps.EastPosition) || pos.Equals(ps.WestPosition)) {
+				return true
+			}
+		}
+		return false
+	}
+	for i := range g.Fences {
+		fence := g.Fences[i]
+		pos := fence.NWSquare
+		if !fence.Horizontal && (pos.Equals(ps.NorthPosition) || pos.Equals(ps.SouthPosition)) {
+			return true
+		}
+	}
+	return false
+}
+
+func (g Game) isCrossable(fence Fence) bool {
+	fences := append(g.Fences, fence)
+    column := g.Board.BoardSize - 1
+	destinations := []Position{}
+	for row := 0; row < g.Board.BoardSize; row++ {
+		destinations = append(destinations, Position{column, row})
+	}
+	return Path(*g.Board, fences, g.Pawn.Position, destinations) != -1
 }
