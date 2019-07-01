@@ -197,3 +197,108 @@ func TestAddFenceShouldNotBePossibleToAddAFenceWhichClosesTheAccessToTheGoalLine
 		t.Errorf("Not the right error: %s", err.Error())
 	}
 }
+
+func TestMovePawnEast(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{3}
+	g, _ := gamecontroller.CreateGame(&configuration)
+	//When
+	g1, _ := g.MovePawn(game.Position{1, 1})
+	//Then
+	if !g1.Pawn.Position.Equals(game.Position{1, 1}) {
+		t.Error("The pawn should move east")
+	}
+}
+
+func TestMovePawnNorth(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{3}
+	g, _ := gamecontroller.CreateGame(&configuration)
+	//When
+	g1, _ := g.MovePawn(game.Position{0, 0})
+	//Then
+	if !g1.Pawn.Position.Equals(game.Position{0, 0}) {
+		t.Error("The pawn should move north")
+	}
+}
+
+func TestMovePawnSouth(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{3}
+	g, _ := gamecontroller.CreateGame(&configuration)
+	//When
+	g1, _ := g.MovePawn(game.Position{0, 2})
+	//Then
+	if !g1.Pawn.Position.Equals(game.Position{0, 2}) {
+		t.Error("The pawn should move south")
+	}
+}
+
+func TestMovePawnWest(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{3}
+	g, _ := gamecontroller.CreateGame(&configuration)
+	g1, _ := g.MovePawn(game.Position{1, 1})
+	//When
+	g2, _ := g1.MovePawn(game.Position{0, 1})
+	//Then
+	if !g2.Pawn.Position.Equals(game.Position{0, 1}) {
+		t.Error("The pawn should move west")
+	}
+}
+
+func TestMovePawnOutOfBoard(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{3}
+	g, _ := gamecontroller.CreateGame(&configuration)
+	//When
+	_, err := g.MovePawn(game.Position{-1, 1})
+	//Then
+	if err == nil {
+		t.Error("It is not possible to move outside of the board")
+		return
+	}
+	if err.Error() != "The new position is not inside the board" {
+		t.Errorf("Not the right error: %s", err.Error())
+	}
+}
+
+func TestMovePawnToUnreachablePosition(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{3}
+	g, _ := gamecontroller.CreateGame(&configuration)
+	//When
+	_, err := g.MovePawn(game.Position{2, 2})
+	//Then
+	if err == nil {
+		t.Error("It is not possible to reach {2 2}")
+		return
+	}
+	if err.Error() != "It is not possible to reach {2 2}" {
+		t.Errorf("Not the right error: %s", err.Error())
+	}
+}
+
+func TestMovePawnCannotCrossFence(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{3}
+	g, _ := gamecontroller.CreateGame(&configuration)
+	g1, _ := g.AddFence(game.Fence{game.Position{0, 0}, false})
+	//When
+	_, err := g1.MovePawn(game.Position{1, 1})
+	//Then
+	if err == nil {
+		t.Error("It is not possible to move to {1 1}")
+		return
+	}
+	if err.Error() != "It is not possible to move to {1 1}" {
+		t.Errorf("Not the right error: %s", err.Error())
+	}
+}

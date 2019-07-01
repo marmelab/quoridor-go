@@ -36,3 +36,14 @@ func GetFence(r *http.Request) (game.Fence, error) {
 	}
 	return fence, nil
 }
+
+func GetPosition(r *http.Request) (game.Position, error) {
+	decoder := json.NewDecoder(r.Body)
+	defer r.Body.Close()
+	var position game.Position
+	err := decoder.Decode(&position)
+	if err != nil {
+		return game.Position{}, err
+	}
+	return position, nil
+}
