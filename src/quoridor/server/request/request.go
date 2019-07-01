@@ -1,21 +1,19 @@
-package server
+package request
 
 import (
 	"encoding/json"
 	"io"
 	"net/http"
-
 	"quoridor/game"
-
 	"github.com/gorilla/mux"
 )
 
-func getGameID(r *http.Request) string {
+func GetGameID(r *http.Request) string {
 	vars := mux.Vars(r)
 	return vars["gameId"]
 }
 
-func getConfiguration(r *http.Request) (*game.Configuration, error) {
+func GetConfiguration(r *http.Request) (*game.Configuration, error) {
 	decoder := json.NewDecoder(r.Body)
 	defer r.Body.Close()
 	var conf game.Configuration
@@ -28,7 +26,7 @@ func getConfiguration(r *http.Request) (*game.Configuration, error) {
 	return &conf, nil
 }
 
-func getFence(r *http.Request) (game.Fence, error) {
+func GetFence(r *http.Request) (game.Fence, error) {
 	decoder := json.NewDecoder(r.Body)
 	defer r.Body.Close()
 	var fence game.Fence
