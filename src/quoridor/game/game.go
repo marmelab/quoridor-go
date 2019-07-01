@@ -75,18 +75,18 @@ func (g Game) IsCrossable(fence Fence) bool {
 	return Path(*g.Board, fences, g.Pawn.Position, destinations) != -1
 }
 
-func (g Game) MovePawn(to Position) (Game, error) {
-	if !g.Board.IsInBoard(to) {
+func (g Game) MovePawn(destination Position) (Game, error) {
+	if !g.Board.IsInBoard(destination) {
 		return Game{}, errors.New("The new position is not inside the board")
 	}
 	from := g.Pawn.Position
-	direction := GetDirection(from, to)
+	direction := GetDirection(from, destination)
 	if (direction == UNKNOWN) {
-		return Game{}, fmt.Errorf("It is not possible to reach %v", to)
+		return Game{}, fmt.Errorf("It is not possible to reach %v", destination)
 	}
-	if !CanMove(from, to, g.Fences) {
-		return Game{}, fmt.Errorf("It is not possible to move to %v", to)
+	if !CanMove(from, destination, g.Fences) {
+		return Game{}, fmt.Errorf("It is not possible to move to %v", destination)
 	}
-	g.Pawn.Position = to
+	g.Pawn.Position = destination
 	return g, nil
 }

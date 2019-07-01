@@ -284,3 +284,21 @@ func TestMovePawnToUnreachablePosition(t *testing.T) {
 		t.Errorf("Not the right error: %s", err.Error())
 	}
 }
+
+func TestMovePawnCannotCrossFence(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{3}
+	g, _ := gamecontroller.CreateGame(&configuration)
+	g1, _ := g.AddFence(game.Fence{game.Position{0, 0}, false})
+	//When
+	_, err := g1.MovePawn(game.Position{1, 1})
+	//Then
+	if err == nil {
+		t.Error("It is not possible to move to {1 1}")
+		return
+	}
+	if err.Error() != "It is not possible to move to {1 1}" {
+		t.Errorf("Not the right error: %s", err.Error())
+	}
+}

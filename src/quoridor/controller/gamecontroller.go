@@ -105,12 +105,12 @@ func removeFences(allPossibilities []game.Fence, g game.Game) game.Fences {
 }
 
 //MovePawn move the pawn on the board
-func MovePawn(id string, to game.Position) (game.Game, error) {
+func MovePawn(id string, destination game.Position) (game.Game, error) {
 	g, err := GetGame(id)
 	if err != nil {
 		return game.Game{}, err
 	}
-	g, errPawn := g.MovePawn(to)
+	g, errPawn := g.MovePawn(destination)
 	if errPawn != nil {
 		return game.Game{}, errPawn
 	}
