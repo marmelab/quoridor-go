@@ -239,3 +239,21 @@ func TestAddFenceShoulBePossibleToAddAnHorizontalFenceBetweenTwoVerticalFences(t
 		t.Errorf("Three fences should be in the board: %d", len(game4.Fences))
 	}
 }
+
+func TestAddFenceShouldNotBePossibleToAddAFenceWhichClosesTheAccessToTheGoalLine(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{3}
+	game1, _ := service.CreateGame(&configuration)
+	game2, _ := game1.AddFence(game.Fence{game.Position{0, 0}, false})
+	//When
+	_, err := game2.AddFence(game.Fence{game.Position{0, 1}, true})
+	//Then
+	if err == nil {
+		t.Error("It should not be possible to add a fence which closes the access to the goal line")
+		return
+	}
+	if err.Error() != "No more access to goal line" {
+		t.Errorf("Not the right error: %s", err.Error())
+	}
+}

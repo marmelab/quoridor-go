@@ -26,3 +26,44 @@ func (p Position) Copy(deltaColumn int, deltaRow int) Position {
 	copy = copy.translateRow(deltaRow)
 	return copy
 }
+
+type Positions []Position
+
+func (positions Positions) IndexOf(e Position) int {
+    for index, a := range positions {
+        if a.Equals(e) {
+            return index
+        }
+    }
+    return -1
+ }
+
+type Direction int
+
+ const (
+	NORTH Direction = iota
+	EAST
+	SOUTH
+	WEST
+	UNKNOWN
+ )
+
+ func getDirection(from Position, to Position) Direction {
+    if from.Row == to.Row {
+        if from.Column + 1 == to.Column {
+            return EAST
+        }
+        if from.Column - 1 == to.Column {
+            return WEST
+        }
+    }
+    if from.Column == to.Column {
+        if from.Row - 1 == to.Row {
+            return NORTH
+        }
+        if from.Row + 1 == to.Row {
+            return SOUTH
+        } 
+    }
+    return UNKNOWN
+}

@@ -65,5 +65,11 @@ func (g Game) hasNeighbourFence(isHorizontal bool, ps PositionSquare) bool {
 }
 
 func (g Game) isCrossable(fence Fence) bool {
-	return true
+	fences := append(g.Fences, fence)
+    column := g.Board.BoardSize - 1
+	destinations := []Position{}
+	for row := 0; row < g.Board.BoardSize; row++ {
+		destinations = append(destinations, Position{column, row})
+	}
+	return Path(*g.Board, fences, g.Pawn.Position, destinations) != -1
 }

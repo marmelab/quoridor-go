@@ -10,6 +10,46 @@ func (f Fence) Equals(other Fence) bool {
 	return f.NWSquare.Equals(other.NWSquare) && f.Horizontal == other.Horizontal
 }
 
+type Fences []Fence
+
+func (fences Fences) indexOf(e Fence) int {
+	for index, a := range fences {
+		if a.Equals(e) {
+			return index
+		}
+	 }
+	return -1
+}
+
+func Collision(fences Fences, fence1 Fence, fence2 Fence) bool {
+    return fences.indexOf(fence1) != -1 || fences.indexOf(fence2) != -1
+}
+
+func CanMove(from Position, to Position, fences []Fence) bool {
+    direction := getDirection(from, to)
+    if (direction == UNKNOWN) {
+        return false
+    }
+    var fence1, fence2 Fence
+    switch direction {
+    case EAST:
+        fence1 = Fence{Position{from.Column, from.Row -1}, false}
+        fence2 = Fence{Position{from.Column, from.Row}, false}
+    case WEST:
+        fence1 = Fence{Position{from.Column -1, from.Row -1}, false}
+        fence2 = Fence{Position{from.Column -1, from.Row}, false}
+    case NORTH:
+        fence1 = Fence{Position{from.Column -1, from.Row -1}, true}
+        fence2 = Fence{Position{from.Column, from.Row -1}, true}
+    case SOUTH:
+        fence1 = Fence{Position{from.Column -1, from.Row + 1}, true}
+        fence2 = Fence{Position{from.Column, from.Row}, true}
+    default:
+        panic("Unknown direction")
+    }
+    return !Collision(fences, fence1, fence2)
+}
+
 type PositionSquare struct {
 	NorthPosition Position
 	EastPosition Position
