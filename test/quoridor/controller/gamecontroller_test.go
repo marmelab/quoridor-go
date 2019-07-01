@@ -70,3 +70,68 @@ func TestGetGameShouldRaiseAnExceptionWithAnUnknownGame(t *testing.T) {
 		t.Error("the game does not exists, an error should be raised")
 	}
 }
+
+func TestGetFencePossibilitiesShouldRaiseAnExceptionWithAnUnknownGame(t *testing.T) {
+	//Given
+	setUp()
+	//When
+	_, err := gamecontroller.GetFencePossibilities("12453po")
+	//Then
+	if err == nil {
+		t.Error("the game does not exists, an error should be raised")
+	}
+}
+
+func TestGetFencePossibilitiesShouldRetrieveAllPossibilities(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{9}
+	newGame, _ := gamecontroller.CreateGame(&configuration)
+	//When
+	fences, _ := gamecontroller.GetFencePossibilities(newGame.ID)
+	//Then
+	if len(fences) != 128 {
+		t.Errorf("Without any fences, there are 128 possibilities but get %v", len(fences))
+	}
+}
+
+func TestGetFencePossibilitiesShouldRetrieveAllPossibilitiesWithAFence(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{9}
+	newGame, _ := gamecontroller.CreateGame(&configuration)
+	gamecontroller.AddFence(newGame.ID, game.Fence{game.Position{0, 0}, false})
+	//When
+	fences, _ := gamecontroller.GetFencePossibilities(newGame.ID)
+	//Then
+	if len(fences) != 125 {
+		t.Errorf("With one fences, there are 125 possibilities but get %v", len(fences))
+	}
+}
+
+func TestGetFencePossibilitiesShouldRetrievePossibilitiesWithoutFence(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{3}
+	newGame, _ := gamecontroller.CreateGame(&configuration)
+	//When
+	fences, _ := gamecontroller.GetFencePossibilities(newGame.ID)
+	//Then
+	if len(fences) != 8 {
+		t.Errorf("With one fences, there are 4 possibilities but get %v", len(fences))
+	}
+}
+
+func TestGetFencePossibilitiesShouldRetrieveAllPossibilitiesWithAFenceWihtoutClosingPath(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{3}
+	newGame, _ := gamecontroller.CreateGame(&configuration)
+	gamecontroller.AddFence(newGame.ID, game.Fence{game.Position{0, 0}, false})
+	//When
+	fences, _ := gamecontroller.GetFencePossibilities(newGame.ID)
+	//Then
+	if len(fences) != 4 {
+		t.Errorf("With one fences, there are 4 possibilities but get %v", len(fences))
+	}
+}

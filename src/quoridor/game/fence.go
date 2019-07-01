@@ -12,7 +12,7 @@ func (f Fence) Equals(other Fence) bool {
 
 type Fences []Fence
 
-func (fences Fences) indexOf(e Fence) int {
+func (fences Fences) IndexOf(e Fence) int {
 	for index, a := range fences {
 		if a.Equals(e) {
 			return index
@@ -21,9 +21,21 @@ func (fences Fences) indexOf(e Fence) int {
 	return -1
 }
 
+func (fences Fences) RemoveFence(e Fence) Fences {
+	index := fences.IndexOf(e)
+	if (index > -1) {
+		return fences.Remove(index)
+	}
+	return fences
+}
+
+func (fences Fences) Remove(index int) Fences {
+	return append(fences[:index], fences[index+1:]...)
+}
+
 //Contains check if at least one fence is inside the fences
 func (fences Fences) Contains(fence1 Fence, fence2 Fence) bool {
-    return fences.indexOf(fence1) != -1 || fences.indexOf(fence2) != -1
+    return fences.IndexOf(fence1) != -1 || fences.IndexOf(fence2) != -1
 }
 
 func CanMove(from Position, to Position, fences Fences) bool {

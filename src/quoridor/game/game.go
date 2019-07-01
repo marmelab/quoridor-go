@@ -26,7 +26,7 @@ func (g Game) AddFence(fence Fence) (Game, error) {
 }
 
 func (g Game) addFenceIfCrossable(fence Fence) (Game, error) {
-	if !g.isCrossable(fence) {
+	if !g.IsCrossable(fence) {
 		return Game{}, errors.New("No more access to goal line")
 	}
 	g.Fences = append(g.Fences, fence)
@@ -64,7 +64,7 @@ func (g Game) hasNeighbourFence(isHorizontal bool, ps PositionSquare) bool {
 	return false
 }
 
-func (g Game) isCrossable(fence Fence) bool {
+func (g Game) IsCrossable(fence Fence) bool {
 	fences := append(g.Fences, fence)
     column := g.Board.BoardSize - 1
 	destinations := []Position{}
