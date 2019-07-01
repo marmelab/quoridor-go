@@ -1,4 +1,4 @@
-package gameservice
+package gamecontroller
 
 import (
 	"errors"

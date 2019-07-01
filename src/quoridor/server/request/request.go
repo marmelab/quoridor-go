@@ -13,7 +13,7 @@ func GetGameID(r *http.Request) string {
 	return vars["gameId"]
 }
 
-func GetConfiguration(r *http.Request) (*game.Configuration, error) {
+func GetGameConfiguration(r *http.Request) (*game.Configuration, error) {
 	decoder := json.NewDecoder(r.Body)
 	defer r.Body.Close()
 	var conf game.Configuration

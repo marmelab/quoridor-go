@@ -2,8 +2,8 @@ package game
 
 import (
 	"testing"
+	"quoridor/controller"
 	"quoridor/game"
-	"quoridor/service"
 	"quoridor/storage"
 )
 
@@ -11,71 +11,11 @@ func setUp() {
 	storage.Init()
 }
 
-func TestCreateGame(t *testing.T) {
-	//Given
-	setUp()
-	configuration := game.Configuration{9}
-	//When
-	newGame, _ := gameservice.CreateGame(&configuration)
-	//Then
-	if newGame.ID == "" {
-		t.Error("create a game should define an id")
-	}
-}
-
-func TestCreateGameShouldNotBePossibleWithEvenNumber(t *testing.T) {
-	//Given
-	setUp()
-	configuration := game.Configuration{8}
-	//When
-	_, err := gameservice.CreateGame(&configuration)
-	//Then
-	if err == nil {
-		t.Error("The size must be an odd number")
-	}
-}
-
-func TestCreateGameShouldNotBePossibleWithLessThanThree(t *testing.T) {
-	//Given
-	setUp()
-	configuration := game.Configuration{1}
-	//When
-	_, err := gameservice.CreateGame(&configuration)
-	//Then
-	if err == nil {
-		t.Error("The size must be at least 3")
-	}
-}
-
-func TestGetGameShouldRetrieveAnExistingGame(t *testing.T) {
-	//Given
-	setUp()
-	configuration := game.Configuration{9}
-	newGame, _ := gameservice.CreateGame(&configuration)
-	//When
-	getGame, _ := gameservice.GetGame(newGame.ID)
-	//Then
-	if newGame.ID != getGame.ID {
-		t.Error("Games are not the same")
-	}
-}
-
-func TestGetGameShouldRaiseAnExceptionWithAnUnknownGame(t *testing.T) {
-	//Given
-	setUp()
-	//When
-	_, err := gameservice.GetGame("12453po")
-	//Then
-	if err == nil {
-		t.Error("the game does not exists, an error should be raised")
-	}
-}
-
 func TestAddFenceShouldAddTheFenceAtTheRightPlace(t *testing.T) {
 	//Given
 	setUp()
 	configuration := game.Configuration{3}
-	newGame, _ := gameservice.CreateGame(&configuration)
+	newGame, _ := gamecontroller.CreateGame(&configuration)
 	//When
 	updatedGame, err := newGame.AddFence(game.Fence{game.Position{0, 0}, false})
 	//Then
@@ -98,7 +38,7 @@ func TestAddFenceShouldNotBePossibleOnVerticalFence(t *testing.T) {
 	//Given
 	setUp()
 	configuration := game.Configuration{3}
-	newGame, _ := gameservice.CreateGame(&configuration)
+	newGame, _ := gamecontroller.CreateGame(&configuration)
 	updatedGame, _ := newGame.AddFence(game.Fence{game.Position{0, 0}, false})
 	//When
 	_, err := updatedGame.AddFence(game.Fence{game.Position{0, 0}, true})
@@ -116,7 +56,7 @@ func TestAddFenceShouldNotBePossibleOnHorizontalFence(t *testing.T) {
 	//Given
 	setUp()
 	configuration := game.Configuration{3}
-	newGame, _ := gameservice.CreateGame(&configuration)
+	newGame, _ := gamecontroller.CreateGame(&configuration)
 	updatedGame, _ := newGame.AddFence(game.Fence{game.Position{0, 0}, true})
 	//When
 	_, err := updatedGame.AddFence(game.Fence{game.Position{0, 0}, false})
@@ -134,7 +74,7 @@ func TestAddFenceShouldNotBePossibleToAddAnHorizontalFenceOnSquareAfterFence(t *
 	//Given
 	setUp()
 	configuration := game.Configuration{5}
-	game1, _ := gameservice.CreateGame(&configuration)
+	game1, _ := gamecontroller.CreateGame(&configuration)
 	game2, _ := game1.AddFence(game.Fence{game.Position{0, 0}, true})
 	//When
 	_, err := game2.AddFence(game.Fence{game.Position{1, 0}, true})
@@ -152,7 +92,7 @@ func TestAddFenceShouldNotBePossibleToAddAVerticalFenceOnSquareAfterFence(t *tes
 	//Given
 	setUp()
 	configuration := game.Configuration{5}
-	game1, _ := gameservice.CreateGame(&configuration)
+	game1, _ := gamecontroller.CreateGame(&configuration)
 	game2, _ := game1.AddFence(game.Fence{game.Position{0, 0}, false})
 	//When
 	_, err := game2.AddFence(game.Fence{game.Position{0, 1}, false})
@@ -170,7 +110,7 @@ func TestAddFenceShouldNotBePossibleToAddAVerticalFenceBeforeVerticalFence(t *te
 	//Given
 	setUp()
 	configuration := game.Configuration{5}
-	game1, _ := gameservice.CreateGame(&configuration)
+	game1, _ := gamecontroller.CreateGame(&configuration)
 	game2, _ := game1.AddFence(game.Fence{game.Position{0, 1}, false})
 	//When
 	_, err := game2.AddFence(game.Fence{game.Position{0, 0}, false})
@@ -188,7 +128,7 @@ func TestAddFenceShouldNotBePossibleToAddAnHorizontalFenceBeforeHorizontalFence(
 	//Given
 	setUp()
 	configuration := game.Configuration{5}
-	game1, _ := gameservice.CreateGame(&configuration)
+	game1, _ := gamecontroller.CreateGame(&configuration)
 	game2, _ := game1.AddFence(game.Fence{game.Position{1, 0}, true})
 	//When
 	_, err := game2.AddFence(game.Fence{game.Position{0, 0}, true})
@@ -206,7 +146,7 @@ func TestAddFenceShoulBePossibleToAddAVerticalFenceBetweenTwoHorizontalFences(t 
 	//Given
 	setUp()
 	configuration := game.Configuration{5}
-	game1, _ := gameservice.CreateGame(&configuration)
+	game1, _ := gamecontroller.CreateGame(&configuration)
 	game2, _ := game1.AddFence(game.Fence{game.Position{0, 0}, true})
 	game3, _ := game2.AddFence(game.Fence{game.Position{2, 0}, true})
 	//When
@@ -225,7 +165,7 @@ func TestAddFenceShoulBePossibleToAddAnHorizontalFenceBetweenTwoVerticalFences(t
 	//Given
 	setUp()
 	configuration := game.Configuration{5}
-	game1, _ := gameservice.CreateGame(&configuration)
+	game1, _ := gamecontroller.CreateGame(&configuration)
 	game2, _ := game1.AddFence(game.Fence{game.Position{0, 0}, false})
 	game3, _ := game2.AddFence(game.Fence{game.Position{0, 2}, false})
 	//When
@@ -244,7 +184,7 @@ func TestAddFenceShouldNotBePossibleToAddAFenceWhichClosesTheAccessToTheGoalLine
 	//Given
 	setUp()
 	configuration := game.Configuration{3}
-	game1, _ := gameservice.CreateGame(&configuration)
+	game1, _ := gamecontroller.CreateGame(&configuration)
 	game2, _ := game1.AddFence(game.Fence{game.Position{0, 0}, false})
 	//When
 	_, err := game2.AddFence(game.Fence{game.Position{0, 1}, true})

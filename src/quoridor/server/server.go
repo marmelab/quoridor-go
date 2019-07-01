@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"quoridor/service"
+	"quoridor/controller"
 	"quoridor/server/request"
 	"quoridor/server/response"
 
@@ -41,12 +41,12 @@ func welcomeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func createGameHandler(w http.ResponseWriter, r *http.Request) {
-	configuration, err := request.GetConfiguration(r)
+	configuration, err := request.GetGameConfiguration(r)
 	if err != nil {
 		response.SendBadRequestError(w, err)
 		return
 	}
-	game, err := gameservice.CreateGame(configuration)
+	game, err := gamecontroller.CreateGame(configuration)
 	if err != nil {
 		response.SendBadRequestError(w, err)
 		return
@@ -56,7 +56,7 @@ func createGameHandler(w http.ResponseWriter, r *http.Request) {
 
 func getGameHandler(w http.ResponseWriter, r *http.Request) {
 	id := request.GetGameID(r)
-	game, err := gameservice.GetGame(id)
+	game, err := gamecontroller.GetGame(id)
 	if err != nil {
 		response.SendBadRequestError(w, err)
 		return
@@ -71,7 +71,7 @@ func addFenceHandler(w http.ResponseWriter, r *http.Request) {
 		response.SendBadRequestError(w, err)
 		return
 	}
-	game, err := gameservice.AddFence(id, fence)
+	game, err := gamecontroller.AddFence(id, fence)
 	if err != nil {
 		response.SendBadRequestError(w, err)
 		return
