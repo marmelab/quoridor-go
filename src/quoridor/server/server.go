@@ -28,6 +28,7 @@ func Start() {
 	router.HandleFunc("/games/{gameId}", getGameHandler).Methods("GET")
 	router.HandleFunc("/games/{gameId}/add-fence", addFenceHandler).Methods("PUT")
 	router.HandleFunc("/games/{gameId}/add-fence/possibilities", getFencePossibilitiesHandler).Methods("GET")
+	router.HandleFunc("/games/{gameId}/move-pawn", movePawnHandler).Methods("PUT")
 	port := getListeningPort()
 	fmt.Printf("Server started on port: %v\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
@@ -88,4 +89,19 @@ func getFencePossibilitiesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	response.SendOK(w, possibilities)
+}
+
+func movePawnHandler(w http.ResponseWriter, r *http.Request) {
+	id := request.GetGameID(r)
+	to, err := request.GetPosition(r)
+	if err != nil {
+		response.SendBadRequestError(w, err)
+		return
+	}
+	game, err := gamecontroller.MovePawn(id, to)
+	if err != nil {
+		response.SendBadRequestError(w, err)
+		return
+	}
+	response.SendOK(w, game)
 }

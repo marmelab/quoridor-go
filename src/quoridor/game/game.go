@@ -2,6 +2,7 @@ package game
 
 import (
 	"errors"
+	"fmt"
 )
 
 // Game is the controller  
@@ -72,4 +73,20 @@ func (g Game) IsCrossable(fence Fence) bool {
 		destinations = append(destinations, Position{column, row})
 	}
 	return Path(*g.Board, fences, g.Pawn.Position, destinations) != -1
+}
+
+func (g Game) MovePawn(to Position) (Game, error) {
+	if !g.Board.IsInBoard(to) {
+		return Game{}, errors.New("The new position is not inside the board")
+	}
+	from := g.Pawn.Position
+	direction := GetDirection(from, to)
+	if (direction == UNKNOWN) {
+		return Game{}, fmt.Errorf("It is not possible to reach %v", to)
+	}
+	if !CanMove(from, to, g.Fences) {
+		return Game{}, fmt.Errorf("It is not possible to move to %v", to)
+	}
+	g.Pawn.Position = to
+	return g, nil
 }
