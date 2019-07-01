@@ -26,7 +26,7 @@ func NewBoard(boardSize int) (*Board, error) {
 	return &Board{boardSize, squares}, nil
 }
 
-func (board Board) isInBoard(position Position) bool { 
+func (board Board) IsInBoard(position Position) bool { 
     row := position.Row
     col := position.Column
     return row >= 0 && row < board.BoardSize && col >= 0 && col < board.BoardSize; 

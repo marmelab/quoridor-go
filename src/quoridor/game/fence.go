@@ -17,7 +17,7 @@ func (fences Fences) indexOf(e Fence) int {
 		if a.Equals(e) {
 			return index
 		}
-	 }
+	}
 	return -1
 }
 
@@ -26,7 +26,7 @@ func Collision(fences Fences, fence1 Fence, fence2 Fence) bool {
 }
 
 func CanMove(from Position, to Position, fences []Fence) bool {
-    direction := getDirection(from, to)
+    direction := GetDirection(from, to)
     if (direction == UNKNOWN) {
         return false
     }

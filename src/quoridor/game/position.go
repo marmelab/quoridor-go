@@ -48,7 +48,7 @@ type Direction int
 	UNKNOWN
  )
 
- func getDirection(from Position, to Position) Direction {
+ func GetDirection(from Position, to Position) Direction {
     if from.Row == to.Row {
         if from.Column + 1 == to.Column {
             return EAST
