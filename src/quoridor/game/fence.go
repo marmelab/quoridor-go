@@ -21,11 +21,12 @@ func (fences Fences) indexOf(e Fence) int {
 	return -1
 }
 
-func Collision(fences Fences, fence1 Fence, fence2 Fence) bool {
+//Contains check if at least one fence is inside the fences
+func (fences Fences) Contains(fence1 Fence, fence2 Fence) bool {
     return fences.indexOf(fence1) != -1 || fences.indexOf(fence2) != -1
 }
 
-func CanMove(from Position, to Position, fences []Fence) bool {
+func CanMove(from Position, to Position, fences Fences) bool {
     direction := GetDirection(from, to)
     if (direction == UNKNOWN) {
         return false
@@ -47,7 +48,7 @@ func CanMove(from Position, to Position, fences []Fence) bool {
     default:
         panic("Unknown direction")
     }
-    return !Collision(fences, fence1, fence2)
+    return !fences.Contains(fence1, fence2)
 }
 
 type PositionSquare struct {
