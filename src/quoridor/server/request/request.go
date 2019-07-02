@@ -13,7 +13,7 @@ func GetGameID(r *http.Request) string {
 	return vars["gameId"]
 }
 
-func GetGameConfiguration(r *http.Request) (*game.Configuration, error) {
+func GetGameConfiguration(r *http.Request) (game.Configuration, error) {
 	decoder := json.NewDecoder(r.Body)
 	defer r.Body.Close()
 	var conf game.Configuration
@@ -21,9 +21,9 @@ func GetGameConfiguration(r *http.Request) (*game.Configuration, error) {
 	if err == io.EOF {
 		conf = game.Configuration{9}
 	} else if err != nil {
-		return nil, err
+		return game.Configuration{}, err
 	}
-	return &conf, nil
+	return conf, nil
 }
 
 func GetFence(r *http.Request) (game.Fence, error) {

@@ -11,6 +11,7 @@ import (
 	"quoridor/server/response"
 
 	"github.com/gorilla/mux"
+	"github.com/lithammer/shortuuid"
 )
 
 // Port is the default server port
@@ -26,6 +27,7 @@ func Start() {
 	router.HandleFunc("/", welcomeHandler).Methods("GET")
 	router.HandleFunc("/games", createGameHandler).Methods("POST")
 	router.HandleFunc("/games/{gameId}", getGameHandler).Methods("GET")
+	router.HandleFunc("/games/{gameId}/join", joinGameHandler).Methods("PUT")
 	router.HandleFunc("/games/{gameId}/add-fence", addFenceHandler).Methods("PUT")
 	router.HandleFunc("/games/{gameId}/add-fence/possibilities", getFencePossibilitiesHandler).Methods("GET")
 	router.HandleFunc("/games/{gameId}/move-pawn", movePawnHandler).Methods("PUT")
@@ -48,11 +50,13 @@ func createGameHandler(w http.ResponseWriter, r *http.Request) {
 		response.SendBadRequestError(w, err)
 		return
 	}
-	game, err := gamecontroller.CreateGame(configuration)
+	gameToken:= shortuuid.New()
+	game, err := gamecontroller.CreateGame(configuration, gameToken)
 	if err != nil {
 		response.SendBadRequestError(w, err)
 		return
 	}
+	w.Header().Set("Quoridor-Token", gameToken)
 	response.SendOK(w, game)
 }
 
@@ -66,6 +70,18 @@ func getGameHandler(w http.ResponseWriter, r *http.Request) {
 	response.SendOK(w, game)
 }
 
+func joinGameHandler(w http.ResponseWriter, r *http.Request) {
+	id := request.GetGameID(r)
+	gameToken:= shortuuid.New()
+	game, err := gamecontroller.JoinGame(id, gameToken)
+	if err != nil {
+		response.SendBadRequestError(w, err)
+		return
+	}
+	w.Header().Set("Quoridor-Token", gameToken)
+	response.SendOK(w, game)
+}
+
 func addFenceHandler(w http.ResponseWriter, r *http.Request) {
 	id := request.GetGameID(r)
 	fence, err := request.GetFence(r)
@@ -73,7 +89,8 @@ func addFenceHandler(w http.ResponseWriter, r *http.Request) {
 		response.SendBadRequestError(w, err)
 		return
 	}
-	game, err := gamecontroller.AddFence(id, fence)
+	gameToken := r.Header.Get("Quoridor-Token")
+	game, err := gamecontroller.AddFence(id, fence, gameToken)
 	if err != nil {
 		response.SendBadRequestError(w, err)
 		return
@@ -98,7 +115,8 @@ func movePawnHandler(w http.ResponseWriter, r *http.Request) {
 		response.SendBadRequestError(w, err)
 		return
 	}
-	game, err := gamecontroller.MovePawn(id, to)
+	gameToken := r.Header.Get("Quoridor-Token")
+	game, err := gamecontroller.MovePawn(id, to, gameToken)
 	if err != nil {
 		response.SendBadRequestError(w, err)
 		return

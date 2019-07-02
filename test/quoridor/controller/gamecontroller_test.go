@@ -16,7 +16,7 @@ func TestCreateGame(t *testing.T) {
 	setUp()
 	configuration := game.Configuration{9}
 	//When
-	newGame, _ := gamecontroller.CreateGame(&configuration)
+	newGame, _ := gamecontroller.CreateGame(configuration, "azerty")
 	//Then
 	if newGame.ID == "" {
 		t.Error("create a game should define an id")
@@ -28,7 +28,7 @@ func TestCreateGameShouldNotBePossibleWithEvenNumber(t *testing.T) {
 	setUp()
 	configuration := game.Configuration{8}
 	//When
-	_, err := gamecontroller.CreateGame(&configuration)
+	_, err := gamecontroller.CreateGame(configuration, "azerty")
 	//Then
 	if err == nil {
 		t.Error("The size must be an odd number")
@@ -40,7 +40,7 @@ func TestCreateGameShouldNotBePossibleWithLessThanThree(t *testing.T) {
 	setUp()
 	configuration := game.Configuration{1}
 	//When
-	_, err := gamecontroller.CreateGame(&configuration)
+	_, err := gamecontroller.CreateGame(configuration, "azerty")
 	//Then
 	if err == nil {
 		t.Error("The size must be at least 3")
@@ -51,7 +51,7 @@ func TestGetGameShouldRetrieveAnExistingGame(t *testing.T) {
 	//Given
 	setUp()
 	configuration := game.Configuration{9}
-	newGame, _ := gamecontroller.CreateGame(&configuration)
+	newGame, _ := gamecontroller.CreateGame(configuration, "azerty")
 	//When
 	getGame, _ := gamecontroller.GetGame(newGame.ID)
 	//Then
@@ -86,7 +86,7 @@ func TestGetFencePossibilitiesShouldRetrieveAllPossibilities(t *testing.T) {
 	//Given
 	setUp()
 	configuration := game.Configuration{9}
-	newGame, _ := gamecontroller.CreateGame(&configuration)
+	newGame, _ := gamecontroller.CreateGame(configuration, "azerty")
 	//When
 	fences, _ := gamecontroller.GetFencePossibilities(newGame.ID)
 	//Then
@@ -99,8 +99,8 @@ func TestGetFencePossibilitiesShouldRetrieveAllPossibilitiesWithAFence(t *testin
 	//Given
 	setUp()
 	configuration := game.Configuration{9}
-	newGame, _ := gamecontroller.CreateGame(&configuration)
-	gamecontroller.AddFence(newGame.ID, game.Fence{game.Position{0, 0}, false})
+	newGame, _ := gamecontroller.CreateGame(configuration, "azerty")
+	gamecontroller.AddFence(newGame.ID, game.Fence{game.Position{0, 0}, false}, "azerty")
 	//When
 	fences, _ := gamecontroller.GetFencePossibilities(newGame.ID)
 	//Then
@@ -113,7 +113,7 @@ func TestGetFencePossibilitiesShouldRetrievePossibilitiesWithoutFence(t *testing
 	//Given
 	setUp()
 	configuration := game.Configuration{3}
-	newGame, _ := gamecontroller.CreateGame(&configuration)
+	newGame, _ := gamecontroller.CreateGame(configuration, "azerty")
 	//When
 	fences, _ := gamecontroller.GetFencePossibilities(newGame.ID)
 	//Then
@@ -126,8 +126,8 @@ func TestGetFencePossibilitiesShouldRetrieveAllPossibilitiesWithAFenceWihtoutClo
 	//Given
 	setUp()
 	configuration := game.Configuration{3}
-	newGame, _ := gamecontroller.CreateGame(&configuration)
-	gamecontroller.AddFence(newGame.ID, game.Fence{game.Position{0, 0}, false})
+	newGame, _ := gamecontroller.CreateGame(configuration, "azerty")
+	gamecontroller.AddFence(newGame.ID, game.Fence{game.Position{0, 0}, false}, "azerty")
 	//When
 	fences, _ := gamecontroller.GetFencePossibilities(newGame.ID)
 	//Then
