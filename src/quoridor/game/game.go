@@ -129,7 +129,7 @@ func (g Game) MovePawn(destination Position) (Game, error) {
 	if (direction == UNKNOWN) {
 		return Game{}, fmt.Errorf("It is not possible to reach %v", destination)
 	}
-	if !CanMove(from, destination, g.Fences) {
+	if !CanMove(from, destination, g.Fences, g.Pawns) {
 		return Game{}, fmt.Errorf("It is not possible to move to %v", destination)
 	}
 	g = g.setCurrentPawnPosition(destination)

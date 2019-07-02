@@ -10,7 +10,7 @@ import (
 const (
 	UnknownPlayer = 0
 	FirstPlayer = 1
-) 
+)
 
 type Party struct {
 	game game.Game

@@ -241,7 +241,7 @@ func TestMovePawnWest(t *testing.T) {
 	setUp()
 	configuration := game.Configuration{3}
 	g, _ := game.NewGame(configuration)
-	g1, _ := g.MovePawn(game.Position{1, 1}) // Move Pawn 1
+	g1, _ := g.MovePawn(game.Position{0, 0}) // Move Pawn 1
 	//When
 	g2, _ := g1.MovePawn(game.Position{1, 1}) // Move Pawn 2
 	//Then
@@ -302,6 +302,24 @@ func TestMovePawnCannotCrossFence(t *testing.T) {
 	}
 }
 
+func TestMovePawnCannotBeOnTheSamePositionOfAnotherPawn(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{3}
+	g, _ := game.NewGame(configuration)
+	g1, _ := g.MovePawn(game.Position{1, 1}) // Move Pawn 1
+	//When
+	_, err := g1.MovePawn(game.Position{1, 1}) // Move Pawn 2
+	//Then
+	if err == nil {
+		t.Error("It is not possible to move to {1 1}")
+		return
+	}
+	if err.Error() != "It is not possible to move to {1 1}" {
+		t.Errorf("Not the right error: %s", err.Error())
+	}
+}
+
 func TestNotOverWhenPawnIsInTheBoard(t *testing.T) {
 	//Given
 	setUp()
@@ -322,7 +340,7 @@ func TestOverWhenPawnArrivesGoalLine(t *testing.T) {
 	configuration := game.Configuration{3}
 	g, _ := game.NewGame(configuration)
 	g1, _ := g.MovePawn(game.Position{1, 1}) //Move Pawn 1
-	g2, _ := g1.MovePawn(game.Position{1, 1}) //Move Pawn 2
+	g2, _ := g1.MovePawn(game.Position{2, 2}) //Move Pawn 2
 	//When
 	g3, _ := g2.MovePawn(game.Position{2, 1}) //Move Pawn 1
 	//Then
@@ -338,10 +356,10 @@ func TestOverNoMoreMove(t *testing.T) {
 	configuration := game.Configuration{3}
 	g, _ := game.NewGame(configuration)
 	g1, _ := g.MovePawn(game.Position{1, 1}) // Move Pawn 1
-	g2, _ := g1.MovePawn(game.Position{1, 1}) // Move Pawn 2
+	g2, _ := g1.MovePawn(game.Position{2, 2}) // Move Pawn 2
 	g3, _ := g2.MovePawn(game.Position{2, 1}) // Move Pawn 1
 	//When
-	_, err := g3.MovePawn(game.Position{0, 1}) // Move Pawn 2
+	_, err := g3.MovePawn(game.Position{1, 2}) // Move Pawn 2
 	//Then
 	if err == nil {
 		t.Error("The game is over, it is not possible to move the pawn")
@@ -358,7 +376,7 @@ func TestOverNoMoreFenceAddition(t *testing.T) {
 	configuration := game.Configuration{3}
 	g, _ := game.NewGame(configuration)
 	g1, _ := g.MovePawn(game.Position{1, 1}) // Move Pawn 1
-	g2, _ := g1.MovePawn(game.Position{1, 1}) // Move Pawn 2
+	g2, _ := g1.MovePawn(game.Position{2, 2}) // Move Pawn 2
 	g3, _ := g2.MovePawn(game.Position{2, 1}) // Move Pawn 1
 	//When
 	_, err := g3.AddFence(game.Fence{game.Position{0, 0}, true})
