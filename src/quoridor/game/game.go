@@ -95,10 +95,10 @@ func (g Game) MovePawn(destination Position) (Game, error) {
 		return Game{}, fmt.Errorf("It is not possible to move to %v", destination)
 	}
 	g.Pawn.Position = destination
-	g.Over = g.isAVictory();
+	g.Over = g.isOver();
 	return g, nil
 }
 
-func (g Game) isAVictory() bool {
+func (g Game) isOver() bool {
 	return g.Pawn.Position.Column == g.Board.BoardSize - 1
 }
