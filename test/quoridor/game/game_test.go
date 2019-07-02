@@ -302,3 +302,70 @@ func TestMovePawnCannotCrossFence(t *testing.T) {
 		t.Errorf("Not the right error: %s", err.Error())
 	}
 }
+
+func TestNotOverWhenPawnIsInTheBoard(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{3}
+	g, _ := gamecontroller.CreateGame(&configuration)
+	//When
+	g1, _ := g.MovePawn(game.Position{1, 1})
+	//Then
+	if g1.Over == true {
+		t.Error("The game is not over, pawn is in the middle of the board")
+		return
+	}
+}
+
+func TestOverWhenPawnArrivesGoalLine(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{3}
+	g, _ := gamecontroller.CreateGame(&configuration)
+	g1, _ := g.MovePawn(game.Position{1, 1})
+	//When
+	g2, _ := g1.MovePawn(game.Position{2, 1})
+	//Then
+	if g2.Over == false {
+		t.Error("The game is over, pawn reaches the goal line")
+		return
+	}
+}
+
+func TestOverNoMoreMove(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{3}
+	g, _ := gamecontroller.CreateGame(&configuration)
+	g1, _ := g.MovePawn(game.Position{1, 1})
+	g2, _ := g1.MovePawn(game.Position{2, 1})
+	//When
+	_, err := g2.MovePawn(game.Position{1, 1})
+	//Then
+	if err == nil {
+		t.Error("The game is over, it is not possible to move the pawn")
+		return
+	}
+	if err.Error() != "Game is over, unable to move the pawn" {
+		t.Errorf("Not the right error: %s", err.Error())
+	}
+}
+
+func TestOverNoMoreFenceAddition(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{3}
+	g, _ := gamecontroller.CreateGame(&configuration)
+	g1, _ := g.MovePawn(game.Position{1, 1})
+	g2, _ := g1.MovePawn(game.Position{2, 1})
+	//When
+	_, err := g2.AddFence(game.Fence{game.Position{0, 0}, true})
+	//Then
+	if err == nil {
+		t.Error("The game is over, it is not possible to add fences")
+		return
+	}
+	if err.Error() != "Game is over, unable to add a fence" {
+		t.Errorf("Not the right error: %s", err.Error())
+	}
+}

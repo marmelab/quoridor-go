@@ -19,7 +19,7 @@ func CreateGame(conf *game.Configuration) (*game.Game, error) {
 	lineCenter := (boardSize - 1) / 2
 	pawn := game.Pawn{game.Position{0, lineCenter}}	
 	id:= shortuuid.New()
-	game := game.Game{id, pawn, []game.Fence{}, board}
+	game := game.Game{id, false, pawn, []game.Fence{}, board}
 	storage.Set(game.ID, game)
 	return &game, nil
 }

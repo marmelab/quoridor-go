@@ -8,6 +8,7 @@ import (
 // Game is the controller  
 type Game struct {
 	ID    string `json:"id"`
+	Over bool `json:"over"`
 	Pawn  Pawn  `json:"pawn"`
 	Fences []Fence `json:"fences"`
 	Board *Board `json:"board"`
@@ -15,6 +16,9 @@ type Game struct {
 
 //AddFence add the fence on the board
 func (g Game) AddFence(fence Fence) (Game, error) {
+	if g.Over {
+		return Game{}, errors.New("Game is over, unable to add a fence")
+	}
 	positionSquare := NewPositionSquare(fence.NWSquare)
 	if g.hasAlreadyAFenceAtTheSamePosition(fence.NWSquare) || g.hasNeighbourFence(fence.Horizontal, positionSquare) {
 		return Game{}, errors.New("The fence overlaps another one")
@@ -76,6 +80,9 @@ func (g Game) IsCrossable(fence Fence) bool {
 }
 
 func (g Game) MovePawn(destination Position) (Game, error) {
+	if g.Over {
+		return Game{}, errors.New("Game is over, unable to move the pawn")
+	}
 	if !g.Board.IsInBoard(destination) {
 		return Game{}, errors.New("The new position is not inside the board")
 	}
@@ -88,5 +95,10 @@ func (g Game) MovePawn(destination Position) (Game, error) {
 		return Game{}, fmt.Errorf("It is not possible to move to %v", destination)
 	}
 	g.Pawn.Position = destination
+	g.Over = g.isOver();
 	return g, nil
+}
+
+func (g Game) isOver() bool {
+	return g.Pawn.Position.Column == g.Board.BoardSize - 1
 }
