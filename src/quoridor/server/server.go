@@ -15,10 +15,17 @@ import (
 )
 
 // Port is the default server port
-const Port = 8383
+const (
+	Port = 8383
+	Authorization = "Authorization"
+)
 
 type Message struct {
 	Message string
+}
+
+type AuthorizationToken struct {
+	AuthToken string
 }
 
 // Start launch the server
@@ -50,13 +57,13 @@ func createGameHandler(w http.ResponseWriter, r *http.Request) {
 		response.SendBadRequestError(w, err)
 		return
 	}
-	gameToken:= shortuuid.New()
-	game, err := gamecontroller.CreateGame(configuration, gameToken)
+	authToken:= shortuuid.New()
+	game, err := gamecontroller.CreateGame(configuration, authToken)
 	if err != nil {
 		response.SendBadRequestError(w, err)
 		return
 	}
-	w.Header().Set("Quoridor-Token", gameToken)
+	w.Header().Set(Authorization, authToken)
 	response.SendOK(w, game)
 }
 
@@ -72,14 +79,13 @@ func getGameHandler(w http.ResponseWriter, r *http.Request) {
 
 func joinGameHandler(w http.ResponseWriter, r *http.Request) {
 	id := request.GetGameID(r)
-	gameToken:= shortuuid.New()
-	game, err := gamecontroller.JoinGame(id, gameToken)
+	authToken:= shortuuid.New()
+	err := gamecontroller.JoinGame(id, authToken)
 	if err != nil {
 		response.SendBadRequestError(w, err)
 		return
 	}
-	w.Header().Set("Quoridor-Token", gameToken)
-	response.SendOK(w, game)
+	response.SendOK(w, AuthorizationToken{authToken})
 }
 
 func addFenceHandler(w http.ResponseWriter, r *http.Request) {
@@ -89,8 +95,8 @@ func addFenceHandler(w http.ResponseWriter, r *http.Request) {
 		response.SendBadRequestError(w, err)
 		return
 	}
-	gameToken := r.Header.Get("Quoridor-Token")
-	game, err := gamecontroller.AddFence(id, fence, gameToken)
+	authToken := r.Header.Get(Authorization)
+	game, err := gamecontroller.AddFence(id, fence, authToken)
 	if err != nil {
 		response.SendBadRequestError(w, err)
 		return
@@ -115,8 +121,8 @@ func movePawnHandler(w http.ResponseWriter, r *http.Request) {
 		response.SendBadRequestError(w, err)
 		return
 	}
-	gameToken := r.Header.Get("Quoridor-Token")
-	game, err := gamecontroller.MovePawn(id, to, gameToken)
+	authToken := r.Header.Get(Authorization)
+	game, err := gamecontroller.MovePawn(id, to, authToken)
 	if err != nil {
 		response.SendBadRequestError(w, err)
 		return

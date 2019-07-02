@@ -176,7 +176,7 @@ func TestJoinGameShouldAddTheOpponent(t *testing.T) {
 	configuration := game.Configuration{9}
 	newGame, _ := gamecontroller.CreateGame(configuration, "azerty")
 	//When
-	_ , err := gamecontroller.JoinGame(newGame.ID, "qsdfgh")
+	err := gamecontroller.JoinGame(newGame.ID, "qsdfgh")
 	//Then
 	if err != nil {
 		t.Errorf("It should be possible to join the game: %s", err.Error())
@@ -190,7 +190,7 @@ func TestJoinGameShouldNotMoreThanExpectedOpponents(t *testing.T) {
 	newGame, _ := gamecontroller.CreateGame(configuration, "azerty")
 	gamecontroller.JoinGame(newGame.ID, "qsdfgh")
 	//When
-	_ , err := gamecontroller.JoinGame(newGame.ID, "wxcvbn")
+	err := gamecontroller.JoinGame(newGame.ID, "wxcvbn")
 	//Then
 	if err == nil {
 		t.Error("It is not possible to join more than expected")

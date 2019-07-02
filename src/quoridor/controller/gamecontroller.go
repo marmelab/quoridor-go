@@ -7,6 +7,11 @@ import (
 	"quoridor/storage"
 )
 
+const (
+	UnknownPlayer = 0
+	FirstPlayer = 1
+) 
+
 type Party struct {
 	game game.Game
 	players map[string]int
@@ -24,9 +29,9 @@ func getParty(id string) (Party, error) {
 	return p.(Party), nil
 }
 
-func checkPlayer(p Party, playerID string) error {
+func checkPlayerCanPlay(p Party, playerID string) error {
 	player := p.players[playerID]
-	if player == 0 {
+	if player == UnknownPlayer {
 		return errors.New("Forbidden")
 	}
 	if !p.isReady() {
@@ -45,7 +50,7 @@ func CreateGame(conf game.Configuration, playerID string) (*game.Game, error) {
 		return nil, err
 	}
 	players := make(map[string]int)
-	players[playerID] = 1
+	players[playerID] = FirstPlayer
 	storage.Set(game.ID, Party{game, players})
 	return &game, nil
 }
@@ -59,26 +64,27 @@ func GetGame(id string) (game.Game, error) {
 	return p.game, nil
 }
 
-func JoinGame(id string, playerID string) (game.Game, error) {
+// JoinGame add a new player to the game
+func JoinGame(id string, playerID string) error {
 	p, err := getParty(id)
 	if err != nil {
-		return game.Game{}, err
+		return err
 	}
 	if p.isReady() {
-		return game.Game{}, errors.New("Game is already set")
+		return errors.New("Game is already set")
 	}
 	p.players[playerID] = len(p.players) + 1
 	storage.Set(p.game.ID, p)
-	return p.game, nil
+	return nil
 }
 
-//AddFence add the fence on the board
+// AddFence add the fence on the board
 func AddFence(id string, fence game.Fence, playerID string) (game.Game, error) {
 	p, err := getParty(id)
 	if err != nil {
 		return game.Game{}, err
 	}
-	errPlayer := checkPlayer(p, playerID)
+	errPlayer := checkPlayerCanPlay(p, playerID)
 	if errPlayer != nil {
 		return game.Game{}, errPlayer
 	}
@@ -91,7 +97,7 @@ func AddFence(id string, fence game.Fence, playerID string) (game.Game, error) {
 	return g, nil
 }
 
-//GetFencePossibilities get all the possibiles places where to add a fence
+// GetFencePossibilities get all the possibiles places where to add a fence
 func GetFencePossibilities(id string) ([]game.Fence, error) {
 	g, err := GetGame(id)
 	if err != nil {
@@ -147,13 +153,13 @@ func removeFences(allPossibilities []game.Fence, g game.Game) game.Fences {
 	return possibilities
 }
 
-//MovePawn move the pawn on the board
+// MovePawn move the pawn on the board
 func MovePawn(id string, destination game.Position, playerID string) (game.Game, error) {
 	p, err := getParty(id)
 	if err != nil {
 		return game.Game{}, err
 	}
-	errPlayer := checkPlayer(p, playerID)
+	errPlayer := checkPlayerCanPlay(p, playerID)
 	if errPlayer != nil {
 		return game.Game{}, errPlayer
 	}
