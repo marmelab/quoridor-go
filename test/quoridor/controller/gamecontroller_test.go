@@ -100,6 +100,7 @@ func TestGetFencePossibilitiesShouldRetrieveAllPossibilitiesWithAFence(t *testin
 	setUp()
 	configuration := game.Configuration{9}
 	newGame, _ := gamecontroller.CreateGame(configuration, "azerty")
+	gamecontroller.JoinGame(newGame.ID, "qsdfgh")
 	gamecontroller.AddFence(newGame.ID, game.Fence{game.Position{0, 0}, false}, "azerty")
 	//When
 	fences, _ := gamecontroller.GetFencePossibilities(newGame.ID)
@@ -127,11 +128,108 @@ func TestGetFencePossibilitiesShouldRetrieveAllPossibilitiesWithAFenceWihtoutClo
 	setUp()
 	configuration := game.Configuration{3}
 	newGame, _ := gamecontroller.CreateGame(configuration, "azerty")
+	gamecontroller.JoinGame(newGame.ID, "qsdfgh")
 	gamecontroller.AddFence(newGame.ID, game.Fence{game.Position{0, 0}, false}, "azerty")
 	//When
 	fences, _ := gamecontroller.GetFencePossibilities(newGame.ID)
 	//Then
 	if len(fences) != 4 {
 		t.Errorf("With one fences, there are 4 possibilities but get %v", len(fences))
+	}
+}
+
+func TestAddFenceNotPossibleWithoutAnOpponent(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{9}
+	newGame, _ := gamecontroller.CreateGame(configuration, "azerty")
+	//When
+	_, err := gamecontroller.AddFence(newGame.ID, game.Fence{game.Position{0, 0}, false}, "azerty")
+	//Then
+	if err == nil {
+		t.Error("It is not possible to play without an opponent")
+	}
+	if err.Error() != "Game is not ready" {
+		t.Errorf("Not the right error: %s", err.Error())
+	}
+}
+
+func TestMovePawnNotPossibleWithoutAnOpponent(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{9}
+	newGame, _ := gamecontroller.CreateGame(configuration, "azerty")
+	//When
+	_, err := gamecontroller.MovePawn(newGame.ID, game.Position{1, 2}, "azerty")
+	//Then
+	if err == nil {
+		t.Error("It is not possible to play without an opponent")
+	}
+	if err.Error() != "Game is not ready" {
+		t.Errorf("Not the right error: %s", err.Error())
+	}
+}
+
+func TestJoinGameShouldAddTheOpponent(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{9}
+	newGame, _ := gamecontroller.CreateGame(configuration, "azerty")
+	//When
+	_ , err := gamecontroller.JoinGame(newGame.ID, "qsdfgh")
+	//Then
+	if err != nil {
+		t.Errorf("It should be possible to join the game: %s", err.Error())
+	}
+}
+
+func TestJoinGameShouldNotMoreThanExpectedOpponents(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{9}
+	newGame, _ := gamecontroller.CreateGame(configuration, "azerty")
+	gamecontroller.JoinGame(newGame.ID, "qsdfgh")
+	//When
+	_ , err := gamecontroller.JoinGame(newGame.ID, "wxcvbn")
+	//Then
+	if err == nil {
+		t.Error("It is not possible to join more than expected")
+	}
+	if err.Error() != "Game is already set" {
+		t.Errorf("Not the right error: %s", err.Error())
+	}
+}
+
+func TestAddFenceNotPossibleWithAnUnkownPlayer(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{9}
+	newGame, _ := gamecontroller.CreateGame(configuration, "azerty")
+	gamecontroller.JoinGame(newGame.ID, "qsdfgh")
+	//When
+	_, err := gamecontroller.AddFence(newGame.ID, game.Fence{game.Position{0, 0}, false}, "spy")
+	//Then
+	if err == nil {
+		t.Error("It is not possible to play with an unknown player")
+	}
+	if err.Error() != "Forbidden" {
+		t.Errorf("Not the right error: %s", err.Error())
+	}
+}
+
+func TestMovePawnNotPossibleWithAnUnkownPlayer(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{9}
+	newGame, _ := gamecontroller.CreateGame(configuration, "azerty")
+	gamecontroller.JoinGame(newGame.ID, "qsdfgh")
+	//When
+	_, err := gamecontroller.MovePawn(newGame.ID, game.Position{1, 2}, "spy")
+	//Then
+	if err == nil {
+		t.Error("It is not possible to play with an unknown player")
+	}
+	if err.Error() != "Forbidden" {
+		t.Errorf("Not the right error: %s", err.Error())
 	}
 }
