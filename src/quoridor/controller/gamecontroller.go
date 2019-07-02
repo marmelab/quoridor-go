@@ -5,52 +5,99 @@ import (
 
 	"quoridor/game"
 	"quoridor/storage"
-
-	"github.com/lithammer/shortuuid"
 )
 
+const (
+	UnknownPlayer = 0
+)
+
+type Party struct {
+	game game.Game
+	players map[string]int
+}
+
+func (p Party) isReady() bool {
+	return len(p.players) == len(p.game.Pawns)
+}
+
+func findPartyByGameID(id string) (Party, error) {
+	p, found := storage.Get(id)
+	if !found {
+		return Party{}, errors.New("The game does not exist")
+	}
+	return p.(Party), nil
+}
+
+func checkPlayerCanPlay(p Party, playerToken string) error {
+	player := p.players[playerToken]
+	if player == UnknownPlayer {
+		return errors.New("Forbidden")
+	}
+	if !p.isReady() {
+		return errors.New("Game is not ready")
+	}
+	if player != p.game.PawnTurn {
+		return errors.New("It is not your turn")
+	}
+	return nil
+}
+
 // CreateGame create a game with the default configuration
-func CreateGame(conf *game.Configuration) (*game.Game, error) {
-	boardSize := conf.BoardSize
-	board, err := game.NewBoard(boardSize)
+func CreateGame(conf game.Configuration) (*game.Game, error) {
+	game, err := game.NewGame(conf)
 	if err != nil {
 		return nil, err
 	}
-	lineCenter := (boardSize - 1) / 2
-	pawn := game.Pawn{game.Position{0, lineCenter}}	
-	id:= shortuuid.New()
-	game := game.Game{id, false, pawn, []game.Fence{}, board}
-	storage.Set(game.ID, game)
+	players := make(map[string]int)
+	storage.Set(game.ID, Party{game, players})
 	return &game, nil
 }
 
 // GetGame get the game via its identifier
-func GetGame(id string) (game.Game, error) {
-	g, found := storage.Get(id)
-	if !found {
-		return game.Game{}, errors.New("The game does not exist")
-	}
-	return g.(game.Game), nil
-}
-
-//AddFence add the fence on the board
-func AddFence(id string, fence game.Fence) (game.Game, error) {
-	g, err := GetGame(id)
+func GetGame(gameID string) (game.Game, error) {
+	p, err := findPartyByGameID(gameID)
 	if err != nil {
 		return game.Game{}, err
 	}
-	g, errFence := g.AddFence(fence)
+	return p.game, nil
+}
+
+// JoinGame add a new player to the game
+func JoinGame(gameID string, playerToken string) error {
+	p, err := findPartyByGameID(gameID)
+	if err != nil {
+		return err
+	}
+	if p.isReady() {
+		return errors.New("Game is already set")
+	}
+	p.players[playerToken] = len(p.players) + 1
+	storage.Set(p.game.ID, p)
+	return nil
+}
+
+// AddFence add the fence on the board
+func AddFence(gameID string, fence game.Fence, playerToken string) (game.Game, error) {
+	p, err := findPartyByGameID(gameID)
+	if err != nil {
+		return game.Game{}, err
+	}
+	errPlayer := checkPlayerCanPlay(p, playerToken)
+	if errPlayer != nil {
+		return game.Game{}, errPlayer
+	}
+	g, errFence := p.game.AddFence(fence)
 	if errFence != nil {
 		return game.Game{}, errFence
 	}
-	storage.Set(g.ID, g)
+	p.game = g
+	storage.Set(p.game.ID, p)
 	return g, nil
 }
 
-
-//AddFencePossibilities get all the possibiles places where to add a fence
-func GetFencePossibilities(id string) ([]game.Fence, error) {
-	g, err := GetGame(id)
+// GetFencePossibilities get all the possibiles places where to add a fence
+func GetFencePossibilities(gameID string) ([]game.Fence, error) {
+	g, err := GetGame(gameID)
 	if err != nil {
 		return []game.Fence{}, err
 	}
@@ -104,16 +151,21 @@ func removeFences(allPossibilities []game.Fence, g game.Game) game.Fences {
 	return possibilities
 }
 
-//MovePawn move the pawn on the board
-func MovePawn(id string, destination game.Position) (game.Game, error) {
-	g, err := GetGame(id)
+// MovePawn move the pawn on the board
+func MovePawn(gameID string, destination game.Position, playerToken string) (game.Game, error) {
+	p, err := findPartyByGameID(gameID)
 	if err != nil {
 		return game.Game{}, err
 	}
-	g, errPawn := g.MovePawn(destination)
+	errPlayer := checkPlayerCanPlay(p, playerToken)
+	if errPlayer != nil {
+		return game.Game{}, errPlayer
+	}
+	g, errPawn := p.game.MovePawn(destination)
 	if errPawn != nil {
 		return game.Game{}, errPawn
 	}
-	storage.Set(g.ID, g)
+	p.game = g
+	storage.Set(p.game.ID, p)
 	return g, nil
 }

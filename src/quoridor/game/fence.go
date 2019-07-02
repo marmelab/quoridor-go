@@ -38,7 +38,7 @@ func (fences Fences) Contains(fence1 Fence, fence2 Fence) bool {
     return fences.IndexOf(fence1) != -1 || fences.IndexOf(fence2) != -1
 }
 
-func CanMove(from Position, to Position, fences Fences) bool {
+func CanMove(from Position, to Position, fences Fences, pawns Pawns) bool {
     direction := GetDirection(from, to)
     if (direction == UNKNOWN) {
         return false
@@ -59,8 +59,8 @@ func CanMove(from Position, to Position, fences Fences) bool {
         fence2 = Fence{Position{from.Column, from.Row}, true}
     default:
         panic("Unknown direction")
-    }
-    return !fences.Contains(fence1, fence2)
+	}
+    return !fences.Contains(fence1, fence2) && pawns.IndexOf(to) == -1
 }
 
 type PositionSquare struct {

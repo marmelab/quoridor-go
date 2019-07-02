@@ -2,7 +2,6 @@ package game
 
 import (
 	"testing"
-	"quoridor/controller"
 	"quoridor/game"
 	"quoridor/storage"
 )
@@ -15,7 +14,7 @@ func TestAddFenceShouldAddTheFenceAtTheRightPlace(t *testing.T) {
 	//Given
 	setUp()
 	configuration := game.Configuration{3}
-	newGame, _ := gamecontroller.CreateGame(&configuration)
+	newGame, _ := game.NewGame(configuration)
 	//When
 	updatedGame, err := newGame.AddFence(game.Fence{game.Position{0, 0}, false})
 	//Then
@@ -38,7 +37,7 @@ func TestAddFenceShouldNotBePossibleOnVerticalFence(t *testing.T) {
 	//Given
 	setUp()
 	configuration := game.Configuration{3}
-	newGame, _ := gamecontroller.CreateGame(&configuration)
+	newGame, _ := game.NewGame(configuration)
 	updatedGame, _ := newGame.AddFence(game.Fence{game.Position{0, 0}, false})
 	//When
 	_, err := updatedGame.AddFence(game.Fence{game.Position{0, 0}, true})
@@ -56,7 +55,7 @@ func TestAddFenceShouldNotBePossibleOnHorizontalFence(t *testing.T) {
 	//Given
 	setUp()
 	configuration := game.Configuration{3}
-	newGame, _ := gamecontroller.CreateGame(&configuration)
+	newGame, _ := game.NewGame(configuration)
 	updatedGame, _ := newGame.AddFence(game.Fence{game.Position{0, 0}, true})
 	//When
 	_, err := updatedGame.AddFence(game.Fence{game.Position{0, 0}, false})
@@ -74,7 +73,7 @@ func TestAddFenceShouldNotBePossibleToAddAnHorizontalFenceOnSquareAfterFence(t *
 	//Given
 	setUp()
 	configuration := game.Configuration{5}
-	game1, _ := gamecontroller.CreateGame(&configuration)
+	game1, _ := game.NewGame(configuration)
 	game2, _ := game1.AddFence(game.Fence{game.Position{0, 0}, true})
 	//When
 	_, err := game2.AddFence(game.Fence{game.Position{1, 0}, true})
@@ -92,7 +91,7 @@ func TestAddFenceShouldNotBePossibleToAddAVerticalFenceOnSquareAfterFence(t *tes
 	//Given
 	setUp()
 	configuration := game.Configuration{5}
-	game1, _ := gamecontroller.CreateGame(&configuration)
+	game1, _ := game.NewGame(configuration)
 	game2, _ := game1.AddFence(game.Fence{game.Position{0, 0}, false})
 	//When
 	_, err := game2.AddFence(game.Fence{game.Position{0, 1}, false})
@@ -110,7 +109,7 @@ func TestAddFenceShouldNotBePossibleToAddAVerticalFenceBeforeVerticalFence(t *te
 	//Given
 	setUp()
 	configuration := game.Configuration{5}
-	game1, _ := gamecontroller.CreateGame(&configuration)
+	game1, _ := game.NewGame(configuration)
 	game2, _ := game1.AddFence(game.Fence{game.Position{0, 1}, false})
 	//When
 	_, err := game2.AddFence(game.Fence{game.Position{0, 0}, false})
@@ -128,7 +127,7 @@ func TestAddFenceShouldNotBePossibleToAddAnHorizontalFenceBeforeHorizontalFence(
 	//Given
 	setUp()
 	configuration := game.Configuration{5}
-	game1, _ := gamecontroller.CreateGame(&configuration)
+	game1, _ := game.NewGame(configuration)
 	game2, _ := game1.AddFence(game.Fence{game.Position{1, 0}, true})
 	//When
 	_, err := game2.AddFence(game.Fence{game.Position{0, 0}, true})
@@ -146,7 +145,7 @@ func TestAddFenceShoulBePossibleToAddAVerticalFenceBetweenTwoHorizontalFences(t 
 	//Given
 	setUp()
 	configuration := game.Configuration{5}
-	game1, _ := gamecontroller.CreateGame(&configuration)
+	game1, _ := game.NewGame(configuration)
 	game2, _ := game1.AddFence(game.Fence{game.Position{0, 0}, true})
 	game3, _ := game2.AddFence(game.Fence{game.Position{2, 0}, true})
 	//When
@@ -165,7 +164,7 @@ func TestAddFenceShoulBePossibleToAddAnHorizontalFenceBetweenTwoVerticalFences(t
 	//Given
 	setUp()
 	configuration := game.Configuration{5}
-	game1, _ := gamecontroller.CreateGame(&configuration)
+	game1, _ := game.NewGame(configuration)
 	game2, _ := game1.AddFence(game.Fence{game.Position{0, 0}, false})
 	game3, _ := game2.AddFence(game.Fence{game.Position{0, 2}, false})
 	//When
@@ -184,7 +183,7 @@ func TestAddFenceShouldNotBePossibleToAddAFenceWhichClosesTheAccessToTheGoalLine
 	//Given
 	setUp()
 	configuration := game.Configuration{3}
-	game1, _ := gamecontroller.CreateGame(&configuration)
+	game1, _ := game.NewGame(configuration)
 	game2, _ := game1.AddFence(game.Fence{game.Position{0, 0}, false})
 	//When
 	_, err := game2.AddFence(game.Fence{game.Position{0, 1}, true})
@@ -202,11 +201,11 @@ func TestMovePawnEast(t *testing.T) {
 	//Given
 	setUp()
 	configuration := game.Configuration{3}
-	g, _ := gamecontroller.CreateGame(&configuration)
+	g, _ := game.NewGame(configuration)
 	//When
 	g1, _ := g.MovePawn(game.Position{1, 1})
 	//Then
-	if !g1.Pawn.Position.Equals(game.Position{1, 1}) {
+	if !g1.Pawns[0].Position.Equals(game.Position{1, 1}) {
 		t.Error("The pawn should move east")
 	}
 }
@@ -215,11 +214,11 @@ func TestMovePawnNorth(t *testing.T) {
 	//Given
 	setUp()
 	configuration := game.Configuration{3}
-	g, _ := gamecontroller.CreateGame(&configuration)
+	g, _ := game.NewGame(configuration)
 	//When
 	g1, _ := g.MovePawn(game.Position{0, 0})
 	//Then
-	if !g1.Pawn.Position.Equals(game.Position{0, 0}) {
+	if !g1.Pawns[0].Position.Equals(game.Position{0, 0}) {
 		t.Error("The pawn should move north")
 	}
 }
@@ -228,11 +227,11 @@ func TestMovePawnSouth(t *testing.T) {
 	//Given
 	setUp()
 	configuration := game.Configuration{3}
-	g, _ := gamecontroller.CreateGame(&configuration)
+	g, _ := game.NewGame(configuration)
 	//When
 	g1, _ := g.MovePawn(game.Position{0, 2})
 	//Then
-	if !g1.Pawn.Position.Equals(game.Position{0, 2}) {
+	if !g1.Pawns[0].Position.Equals(game.Position{0, 2}) {
 		t.Error("The pawn should move south")
 	}
 }
@@ -241,12 +240,12 @@ func TestMovePawnWest(t *testing.T) {
 	//Given
 	setUp()
 	configuration := game.Configuration{3}
-	g, _ := gamecontroller.CreateGame(&configuration)
-	g1, _ := g.MovePawn(game.Position{1, 1})
+	g, _ := game.NewGame(configuration)
+	g1, _ := g.MovePawn(game.Position{0, 0}) // Move Pawn 1
 	//When
-	g2, _ := g1.MovePawn(game.Position{0, 1})
+	g2, _ := g1.MovePawn(game.Position{1, 1}) // Move Pawn 2
 	//Then
-	if !g2.Pawn.Position.Equals(game.Position{0, 1}) {
+	if !g2.Pawns[1].Position.Equals(game.Position{1, 1}) {
 		t.Error("The pawn should move west")
 	}
 }
@@ -255,7 +254,7 @@ func TestMovePawnOutOfBoard(t *testing.T) {
 	//Given
 	setUp()
 	configuration := game.Configuration{3}
-	g, _ := gamecontroller.CreateGame(&configuration)
+	g, _ := game.NewGame(configuration)
 	//When
 	_, err := g.MovePawn(game.Position{-1, 1})
 	//Then
@@ -272,7 +271,7 @@ func TestMovePawnToUnreachablePosition(t *testing.T) {
 	//Given
 	setUp()
 	configuration := game.Configuration{3}
-	g, _ := gamecontroller.CreateGame(&configuration)
+	g, _ := game.NewGame(configuration)
 	//When
 	_, err := g.MovePawn(game.Position{2, 2})
 	//Then
@@ -289,10 +288,28 @@ func TestMovePawnCannotCrossFence(t *testing.T) {
 	//Given
 	setUp()
 	configuration := game.Configuration{3}
-	g, _ := gamecontroller.CreateGame(&configuration)
-	g1, _ := g.AddFence(game.Fence{game.Position{0, 0}, false})
+	g, _ := game.NewGame(configuration)
+	g1, _ := g.AddFence(game.Fence{game.Position{1, 0}, false})
 	//When
 	_, err := g1.MovePawn(game.Position{1, 1})
+	//Then
+	if err == nil {
+		t.Error("It is not possible to move to {1 1}")
+		return
+	}
+	if err.Error() != "It is not possible to move to {1 1}" {
+		t.Errorf("Not the right error: %s", err.Error())
+	}
+}
+
+func TestMovePawnCannotBeOnTheSamePositionOfAnotherPawn(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{3}
+	g, _ := game.NewGame(configuration)
+	g1, _ := g.MovePawn(game.Position{1, 1}) // Move Pawn 1
+	//When
+	_, err := g1.MovePawn(game.Position{1, 1}) // Move Pawn 2
 	//Then
 	if err == nil {
 		t.Error("It is not possible to move to {1 1}")
@@ -307,7 +324,7 @@ func TestNotOverWhenPawnIsInTheBoard(t *testing.T) {
 	//Given
 	setUp()
 	configuration := game.Configuration{3}
-	g, _ := gamecontroller.CreateGame(&configuration)
+	g, _ := game.NewGame(configuration)
 	//When
 	g1, _ := g.MovePawn(game.Position{1, 1})
 	//Then
@@ -321,12 +338,13 @@ func TestOverWhenPawnArrivesGoalLine(t *testing.T) {
 	//Given
 	setUp()
 	configuration := game.Configuration{3}
-	g, _ := gamecontroller.CreateGame(&configuration)
-	g1, _ := g.MovePawn(game.Position{1, 1})
+	g, _ := game.NewGame(configuration)
+	g1, _ := g.MovePawn(game.Position{1, 1}) //Move Pawn 1
+	g2, _ := g1.MovePawn(game.Position{2, 2}) //Move Pawn 2
 	//When
-	g2, _ := g1.MovePawn(game.Position{2, 1})
+	g3, _ := g2.MovePawn(game.Position{2, 1}) //Move Pawn 1
 	//Then
-	if g2.Over == false {
+	if g3.Over == false {
 		t.Error("The game is over, pawn reaches the goal line")
 		return
 	}
@@ -336,11 +354,12 @@ func TestOverNoMoreMove(t *testing.T) {
 	//Given
 	setUp()
 	configuration := game.Configuration{3}
-	g, _ := gamecontroller.CreateGame(&configuration)
-	g1, _ := g.MovePawn(game.Position{1, 1})
-	g2, _ := g1.MovePawn(game.Position{2, 1})
+	g, _ := game.NewGame(configuration)
+	g1, _ := g.MovePawn(game.Position{1, 1}) // Move Pawn 1
+	g2, _ := g1.MovePawn(game.Position{2, 2}) // Move Pawn 2
+	g3, _ := g2.MovePawn(game.Position{2, 1}) // Move Pawn 1
 	//When
-	_, err := g2.MovePawn(game.Position{1, 1})
+	_, err := g3.MovePawn(game.Position{1, 2}) // Move Pawn 2
 	//Then
 	if err == nil {
 		t.Error("The game is over, it is not possible to move the pawn")
@@ -355,11 +374,12 @@ func TestOverNoMoreFenceAddition(t *testing.T) {
 	//Given
 	setUp()
 	configuration := game.Configuration{3}
-	g, _ := gamecontroller.CreateGame(&configuration)
-	g1, _ := g.MovePawn(game.Position{1, 1})
-	g2, _ := g1.MovePawn(game.Position{2, 1})
+	g, _ := game.NewGame(configuration)
+	g1, _ := g.MovePawn(game.Position{1, 1}) // Move Pawn 1
+	g2, _ := g1.MovePawn(game.Position{2, 2}) // Move Pawn 2
+	g3, _ := g2.MovePawn(game.Position{2, 1}) // Move Pawn 1
 	//When
-	_, err := g2.AddFence(game.Fence{game.Position{0, 0}, true})
+	_, err := g3.AddFence(game.Fence{game.Position{0, 0}, true})
 	//Then
 	if err == nil {
 		t.Error("The game is over, it is not possible to add fences")

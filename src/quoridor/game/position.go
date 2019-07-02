@@ -40,7 +40,7 @@ func (positions Positions) IndexOf(e Position) int {
 
 type Direction int
 
- const (
+const (
 	NORTH Direction = iota
 	EAST
 	SOUTH
@@ -48,7 +48,7 @@ type Direction int
 	UNKNOWN
  )
 
- func GetDirection(from Position, to Position) Direction {
+func GetDirection(from Position, to Position) Direction {
     if from.Row == to.Row {
         if from.Column + 1 == to.Column {
             return EAST

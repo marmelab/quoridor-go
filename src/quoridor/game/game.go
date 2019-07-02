@@ -3,18 +3,37 @@ package game
 import (
 	"errors"
 	"fmt"
+
+	"github.com/lithammer/shortuuid"
 )
 
 // Game is the controller  
 type Game struct {
-	ID    string `json:"id"`
+	ID string `json:"id"`
 	Over bool `json:"over"`
-	Pawn  Pawn  `json:"pawn"`
+	PawnTurn int `json:"pawnTurn"`
+	Pawns []Pawn  `json:"pawn"`
 	Fences []Fence `json:"fences"`
 	Board *Board `json:"board"`
 }
 
-//AddFence add the fence on the board
+// NewGame create a new game depending on the configuration
+func NewGame(conf Configuration) (Game, error) {
+	boardSize := conf.BoardSize
+	board, err := NewBoard(boardSize)
+	if err != nil {
+		return Game{}, err
+	}
+	lineCenter := (boardSize - 1) / 2
+	pawns := []Pawn{
+		Pawn{Position{0, lineCenter}, EAST},
+		Pawn{Position{boardSize - 1, lineCenter}, WEST},
+	}
+	id:= shortuuid.New()
+	return Game{id, false, 1, pawns, []Fence{}, board}, nil
+}
+
+// AddFence add the fence on the board
 func (g Game) AddFence(fence Fence) (Game, error) {
 	if g.Over {
 		return Game{}, errors.New("Game is over, unable to add a fence")
@@ -27,6 +46,7 @@ func (g Game) AddFence(fence Fence) (Game, error) {
 	if err != nil {
 		return Game{}, err
 	}
+	g.PawnTurn = g.getNextPawnTurn()
 	return g, nil
 }
 
@@ -69,16 +89,34 @@ func (g Game) hasNeighbourFence(isHorizontal bool, ps PositionSquare) bool {
 	return false
 }
 
+// IsCrossable check whether the fence can be added and let a path for all pawns to their goal line
 func (g Game) IsCrossable(fence Fence) bool {
 	fences := append(g.Fences, fence)
-    column := g.Board.BoardSize - 1
+	for i := range g.Pawns {
+		pawn := g.Pawns[i]
+		destinations := g.getGoalLine(pawn)
+		 if Path(*g.Board, fences, pawn.Position, destinations) == -1 {
+			return false
+		 }
+	}
+	return true
+}
+
+func (g Game) getGoalLine(pawn Pawn) []Position {
 	destinations := []Position{}
+	var column int
+	if pawn.Goal == EAST {
+		column = g.Board.BoardSize - 1
+	} else if pawn.Goal == WEST {
+		column = 0
+	}
 	for row := 0; row < g.Board.BoardSize; row++ {
 		destinations = append(destinations, Position{column, row})
 	}
-	return Path(*g.Board, fences, g.Pawn.Position, destinations) != -1
+	return destinations
 }
 
+// MovePawn move the pawn to the destination
 func (g Game) MovePawn(destination Position) (Game, error) {
 	if g.Over {
 		return Game{}, errors.New("Game is over, unable to move the pawn")
@@ -86,19 +124,47 @@ func (g Game) MovePawn(destination Position) (Game, error) {
 	if !g.Board.IsInBoard(destination) {
 		return Game{}, errors.New("The new position is not inside the board")
 	}
-	from := g.Pawn.Position
+	from := g.getCurrentPawn().Position
 	direction := GetDirection(from, destination)
 	if (direction == UNKNOWN) {
 		return Game{}, fmt.Errorf("It is not possible to reach %v", destination)
 	}
-	if !CanMove(from, destination, g.Fences) {
+	if !CanMove(from, destination, g.Fences, g.Pawns) {
 		return Game{}, fmt.Errorf("It is not possible to move to %v", destination)
 	}
-	g.Pawn.Position = destination
-	g.Over = g.isOver();
+	g = g.setCurrentPawnPosition(destination)
+	over, err := g.isOver()
+	if (err != nil) {
+		return Game{}, err
+	}
+	g.Over = over
+	g.PawnTurn = g.getNextPawnTurn()
 	return g, nil
 }
 
-func (g Game) isOver() bool {
-	return g.Pawn.Position.Column == g.Board.BoardSize - 1
+func (g Game) isOver() (bool, error) {
+	pawn := g.getCurrentPawn()
+	if pawn.Goal == EAST {
+		return pawn.Position.Column == g.Board.BoardSize - 1, nil
+	}
+	if pawn.Goal == WEST {
+		return pawn.Position.Column == 0, nil
+	}
+	return false, fmt.Errorf("Goal direction not supported %v", pawn.Goal)
+}
+
+func (g Game) getNextPawnTurn() int {
+	if g.PawnTurn + 1 > len(g.Pawns) {
+		return 1
+	}
+	return g.PawnTurn + 1
+}
+
+func (g Game) getCurrentPawn() Pawn {
+	return g.Pawns[g.PawnTurn -1]
+}
+
+func (g Game) setCurrentPawnPosition(newPosition Position) Game {
+	g.Pawns[g.PawnTurn -1].Position = newPosition
+	return g
 }
