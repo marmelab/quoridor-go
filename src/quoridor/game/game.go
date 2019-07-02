@@ -45,7 +45,7 @@ func (g Game) AddFence(fence Fence) (Game, error) {
 	if err != nil {
 		return Game{}, err
 	}
-	g.PlayerTurn = g.howIsNext()
+	g.PlayerTurn = g.whoIsNext()
 	return g, nil
 }
 
@@ -135,7 +135,7 @@ func (g Game) MovePawn(destination Position) (Game, error) {
 		return Game{}, err
 	}
 	g.Over = over
-	g.PlayerTurn = g.howIsNext()
+	g.PlayerTurn = g.whoIsNext()
 	return g, nil
 }
 
@@ -150,7 +150,7 @@ func (g Game) isOver() (bool, error) {
 	return false, fmt.Errorf("Goal direction not supported %v", pawn.Goal)
 }
 
-func (g Game) howIsNext() int {
+func (g Game) whoIsNext() int {
 	if g.PlayerTurn + 1 > len(g.Pawns) {
 		return 1
 	}
