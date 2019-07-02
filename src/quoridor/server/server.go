@@ -17,7 +17,7 @@ import (
 // Port is the default server port
 const (
 	Port = 8383
-	Authorization = "Authorization"
+	AuthorizationHeaderName = "Authorization"
 )
 
 type Message struct {
@@ -57,13 +57,11 @@ func createGameHandler(w http.ResponseWriter, r *http.Request) {
 		response.SendBadRequestError(w, err)
 		return
 	}
-	authToken:= shortuuid.New()
-	game, err := gamecontroller.CreateGame(configuration, authToken)
+	game, err := gamecontroller.CreateGame(configuration)
 	if err != nil {
 		response.SendBadRequestError(w, err)
 		return
 	}
-	w.Header().Set(Authorization, authToken)
 	response.SendOK(w, game)
 }
 
@@ -95,7 +93,7 @@ func addFenceHandler(w http.ResponseWriter, r *http.Request) {
 		response.SendBadRequestError(w, err)
 		return
 	}
-	authToken := r.Header.Get(Authorization)
+	authToken := r.Header.Get(AuthorizationHeaderName)
 	game, err := gamecontroller.AddFence(id, fence, authToken)
 	if err != nil {
 		response.SendBadRequestError(w, err)
@@ -121,7 +119,7 @@ func movePawnHandler(w http.ResponseWriter, r *http.Request) {
 		response.SendBadRequestError(w, err)
 		return
 	}
-	authToken := r.Header.Get(Authorization)
+	authToken := r.Header.Get(AuthorizationHeaderName)
 	game, err := gamecontroller.MovePawn(id, to, authToken)
 	if err != nil {
 		response.SendBadRequestError(w, err)

@@ -11,7 +11,7 @@ import (
 type Game struct {
 	ID string `json:"id"`
 	Over bool `json:"over"`
-	PlayerTurn int `json:"playerTurn"`
+	PawnTurn int `json:"pawnTurn"`
 	Pawns []Pawn  `json:"pawn"`
 	Fences []Fence `json:"fences"`
 	Board *Board `json:"board"`
@@ -46,7 +46,7 @@ func (g Game) AddFence(fence Fence) (Game, error) {
 	if err != nil {
 		return Game{}, err
 	}
-	g.PlayerTurn = g.whoIsNext()
+	g.PawnTurn = g.getNextPawnTurn()
 	return g, nil
 }
 
@@ -138,7 +138,7 @@ func (g Game) MovePawn(destination Position) (Game, error) {
 		return Game{}, err
 	}
 	g.Over = over
-	g.PlayerTurn = g.whoIsNext()
+	g.PawnTurn = g.getNextPawnTurn()
 	return g, nil
 }
 
@@ -153,18 +153,18 @@ func (g Game) isOver() (bool, error) {
 	return false, fmt.Errorf("Goal direction not supported %v", pawn.Goal)
 }
 
-func (g Game) whoIsNext() int {
-	if g.PlayerTurn + 1 > len(g.Pawns) {
+func (g Game) getNextPawnTurn() int {
+	if g.PawnTurn + 1 > len(g.Pawns) {
 		return 1
 	}
-	return g.PlayerTurn + 1
+	return g.PawnTurn + 1
 }
 
 func (g Game) getCurrentPawn() Pawn {
-	return g.Pawns[g.PlayerTurn -1]
+	return g.Pawns[g.PawnTurn -1]
 }
 
 func (g Game) setCurrentPawnPosition(newPosition Position) Game {
-	g.Pawns[g.PlayerTurn -1].Position = newPosition
+	g.Pawns[g.PawnTurn -1].Position = newPosition
 	return g
 }
