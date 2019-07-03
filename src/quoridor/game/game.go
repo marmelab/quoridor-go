@@ -26,8 +26,7 @@ type Game struct {
 }
 
 // NewGame create a new game depending on the configuration
-func NewGame(conf Configuration) (Game, error) {
-	boardSize := conf.BoardSize
+func NewGame(boardSize int) (Game, error) {
 	board, err := NewBoard(boardSize)
 	if err != nil {
 		return Game{}, err

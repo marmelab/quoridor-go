@@ -19,7 +19,7 @@ func GetGameConfiguration(r *http.Request) (game.Configuration, error) {
 	var conf game.Configuration
 	err := decoder.Decode(&conf)
 	if err == io.EOF {
-		conf = game.Configuration{9}
+		conf = game.Configuration{9, 10}
 	} else if err != nil {
 		return game.Configuration{}, err
 	}

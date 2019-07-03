@@ -14,7 +14,7 @@ func setUp() {
 func TestCreateGame(t *testing.T) {
 	//Given
 	setUp()
-	configuration := game.Configuration{9}
+	configuration := game.Configuration{9, 10}
 	//When
 	newGame, _ := gamecontroller.CreateGame(configuration)
 	//Then
@@ -26,7 +26,7 @@ func TestCreateGame(t *testing.T) {
 func TestCreateGameShouldNotBePossibleWithEvenNumber(t *testing.T) {
 	//Given
 	setUp()
-	configuration := game.Configuration{8}
+	configuration := game.Configuration{8, 10}
 	//When
 	_, err := gamecontroller.CreateGame(configuration)
 	//Then
@@ -38,7 +38,7 @@ func TestCreateGameShouldNotBePossibleWithEvenNumber(t *testing.T) {
 func TestCreateGameShouldNotBePossibleWithLessThanThree(t *testing.T) {
 	//Given
 	setUp()
-	configuration := game.Configuration{1}
+	configuration := game.Configuration{1, 10}
 	//When
 	_, err := gamecontroller.CreateGame(configuration)
 	//Then
@@ -50,7 +50,7 @@ func TestCreateGameShouldNotBePossibleWithLessThanThree(t *testing.T) {
 func TestGetGameShouldRetrieveAnExistingGame(t *testing.T) {
 	//Given
 	setUp()
-	configuration := game.Configuration{9}
+	configuration := game.Configuration{9, 10}
 	newGame, _ := gamecontroller.CreateGame(configuration)
 	//When
 	getGame, _ := gamecontroller.GetGame(newGame.ID)
@@ -85,7 +85,7 @@ func TestGetFencePossibilitiesShouldRaiseAnExceptionWithAnUnknownGame(t *testing
 func TestGetFencePossibilitiesShouldRetrieveAllPossibilities(t *testing.T) {
 	//Given
 	setUp()
-	configuration := game.Configuration{9}
+	configuration := game.Configuration{9, 10}
 	newGame, _ := gamecontroller.CreateGame(configuration)
 	gamecontroller.JoinGame(newGame.ID, "azerty")
 	//When
@@ -99,7 +99,7 @@ func TestGetFencePossibilitiesShouldRetrieveAllPossibilities(t *testing.T) {
 func TestGetFencePossibilitiesShouldRetrieveAllPossibilitiesWithAFence(t *testing.T) {
 	//Given
 	setUp()
-	configuration := game.Configuration{9}
+	configuration := game.Configuration{9, 10}
 	newGame, _ := gamecontroller.CreateGame(configuration)
 	gamecontroller.JoinGame(newGame.ID, "azerty")
 	gamecontroller.JoinGame(newGame.ID, "qsdfgh")
@@ -115,7 +115,7 @@ func TestGetFencePossibilitiesShouldRetrieveAllPossibilitiesWithAFence(t *testin
 func TestGetFencePossibilitiesShouldRetrievePossibilitiesWithoutFence(t *testing.T) {
 	//Given
 	setUp()
-	configuration := game.Configuration{3}
+	configuration := game.Configuration{3, 10}
 	newGame, _ := gamecontroller.CreateGame(configuration)
 	//When
 	fences, _ := gamecontroller.GetFencePossibilities(newGame.ID)
@@ -128,7 +128,7 @@ func TestGetFencePossibilitiesShouldRetrievePossibilitiesWithoutFence(t *testing
 func TestGetFencePossibilitiesShouldRetrieveAllPossibilitiesWithAFenceWihtoutClosingPath(t *testing.T) {
 	//Given
 	setUp()
-	configuration := game.Configuration{3}
+	configuration := game.Configuration{3, 10}
 	newGame, _ := gamecontroller.CreateGame(configuration)
 	gamecontroller.JoinGame(newGame.ID, "azerty")
 	gamecontroller.JoinGame(newGame.ID, "qsdfgh")
@@ -144,7 +144,7 @@ func TestGetFencePossibilitiesShouldRetrieveAllPossibilitiesWithAFenceWihtoutClo
 func TestAddFenceNotPossibleWithoutAnOpponent(t *testing.T) {
 	//Given
 	setUp()
-	configuration := game.Configuration{9}
+	configuration := game.Configuration{9, 10}
 	newGame, _ := gamecontroller.CreateGame(configuration)
 	gamecontroller.JoinGame(newGame.ID, "azerty")
 	//When
@@ -161,7 +161,7 @@ func TestAddFenceNotPossibleWithoutAnOpponent(t *testing.T) {
 func TestMovePawnNotPossibleWithoutAnOpponent(t *testing.T) {
 	//Given
 	setUp()
-	configuration := game.Configuration{9}
+	configuration := game.Configuration{9, 10}
 	newGame, _ := gamecontroller.CreateGame(configuration)
 	gamecontroller.JoinGame(newGame.ID, "azerty")
 	//When
@@ -178,7 +178,7 @@ func TestMovePawnNotPossibleWithoutAnOpponent(t *testing.T) {
 func TestJoinGameShouldAddTheOpponent(t *testing.T) {
 	//Given
 	setUp()
-	configuration := game.Configuration{9}
+	configuration := game.Configuration{9, 10}
 	newGame, _ := gamecontroller.CreateGame(configuration)
 	gamecontroller.JoinGame(newGame.ID, "azerty")
 	//When
@@ -192,7 +192,7 @@ func TestJoinGameShouldAddTheOpponent(t *testing.T) {
 func TestJoinGameShouldNotMoreThanExpectedOpponents(t *testing.T) {
 	//Given
 	setUp()
-	configuration := game.Configuration{9}
+	configuration := game.Configuration{9, 10}
 	newGame, _ := gamecontroller.CreateGame(configuration)
 	gamecontroller.JoinGame(newGame.ID, "azerty")
 	gamecontroller.JoinGame(newGame.ID, "qsdfgh")
@@ -210,7 +210,7 @@ func TestJoinGameShouldNotMoreThanExpectedOpponents(t *testing.T) {
 func TestAddFenceNotPossibleWithAnUnkownPlayer(t *testing.T) {
 	//Given
 	setUp()
-	configuration := game.Configuration{9}
+	configuration := game.Configuration{9, 10}
 	newGame, _ := gamecontroller.CreateGame(configuration)
 	gamecontroller.JoinGame(newGame.ID, "azerty")
 	gamecontroller.JoinGame(newGame.ID, "qsdfgh")
@@ -228,7 +228,7 @@ func TestAddFenceNotPossibleWithAnUnkownPlayer(t *testing.T) {
 func TestMovePawnNotPossibleWithAnUnkownPlayer(t *testing.T) {
 	//Given
 	setUp()
-	configuration := game.Configuration{9}
+	configuration := game.Configuration{9, 10}
 	newGame, _ := gamecontroller.CreateGame(configuration)
 	gamecontroller.JoinGame(newGame.ID, "azerty")
 	gamecontroller.JoinGame(newGame.ID, "qsdfgh")
@@ -239,6 +239,26 @@ func TestMovePawnNotPossibleWithAnUnkownPlayer(t *testing.T) {
 		t.Error("It is not possible to play with an unknown player")
 	}
 	if err.Error() != "Forbidden" {
+		t.Errorf("Not the right error: %s", err.Error())
+	}
+}
+
+func TestAddFenceNoMore(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{9, 1}
+	newGame, _ := gamecontroller.CreateGame(configuration)
+	gamecontroller.JoinGame(newGame.ID, "azerty")
+	gamecontroller.JoinGame(newGame.ID, "qsdfgh")
+	gamecontroller.AddFence(newGame.ID, game.Fence{game.Position{0, 0}, false}, "azerty")
+	gamecontroller.AddFence(newGame.ID, game.Fence{game.Position{1, 0}, false}, "qsdfgh")
+	//When
+	_, err := gamecontroller.AddFence(newGame.ID, game.Fence{game.Position{2, 0}, false}, "azerty")
+	//Then
+	if err == nil {
+		t.Error("No more fences to add")
+	}
+	if err.Error() != "No more fences to add" {
 		t.Errorf("Not the right error: %s", err.Error())
 	}
 }
