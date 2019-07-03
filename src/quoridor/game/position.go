@@ -30,13 +30,22 @@ func (p Position) Copy(deltaColumn int, deltaRow int) Position {
 type Positions []Position
 
 func (positions Positions) IndexOf(e Position) int {
-    for index, a := range positions {
-        if a.Equals(e) {
-            return index
-        }
-    }
-    return -1
- }
+	for index, a := range positions {
+		if a.Equals(e) {
+			return index
+		}
+	}
+	return -1
+}
+
+func (positions Positions) appendIfNotPresent(second Positions) Positions {
+	for _, pos := range second {
+		if positions.IndexOf(pos) == -1 {
+			positions = append(positions, pos)
+		}
+	}
+	return positions
+}
 
 type Direction int
 
@@ -46,24 +55,24 @@ const (
 	SOUTH
 	WEST
 	UNKNOWN
- )
+)
 
 func GetDirection(from Position, to Position) Direction {
-    if from.Row == to.Row {
-        if from.Column + 1 == to.Column {
-            return EAST
-        }
-        if from.Column - 1 == to.Column {
-            return WEST
-        }
-    }
-    if from.Column == to.Column {
-        if from.Row - 1 == to.Row {
-            return NORTH
-        }
-        if from.Row + 1 == to.Row {
-            return SOUTH
-        } 
-    }
-    return UNKNOWN
+	if from.Row == to.Row {
+		if from.Column+1 == to.Column {
+			return EAST
+		}
+		if from.Column-1 == to.Column {
+			return WEST
+		}
+	}
+	if from.Column == to.Column {
+		if from.Row-1 == to.Row {
+			return NORTH
+		}
+		if from.Row+1 == to.Row {
+			return SOUTH
+		}
+	}
+	return UNKNOWN
 }

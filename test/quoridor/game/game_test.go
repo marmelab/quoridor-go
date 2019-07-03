@@ -1,9 +1,9 @@
 package game
 
 import (
-	"testing"
 	"quoridor/game"
 	"quoridor/storage"
+	"testing"
 )
 
 func setUp() {
@@ -276,10 +276,10 @@ func TestMovePawnToUnreachablePosition(t *testing.T) {
 	_, err := g.MovePawn(game.Position{2, 2})
 	//Then
 	if err == nil {
-		t.Error("It is not possible to reach {2 2}")
+		t.Error("It is not possible to move to {2 2}")
 		return
 	}
-	if err.Error() != "It is not possible to reach {2 2}" {
+	if err.Error() != "It is not possible to move to {2 2}" {
 		t.Errorf("Not the right error: %s", err.Error())
 	}
 }
@@ -339,7 +339,7 @@ func TestOverWhenPawnArrivesGoalLine(t *testing.T) {
 	setUp()
 	configuration := game.Configuration{3}
 	g, _ := game.NewGame(configuration)
-	g1, _ := g.MovePawn(game.Position{1, 1}) //Move Pawn 1
+	g1, _ := g.MovePawn(game.Position{1, 1})  //Move Pawn 1
 	g2, _ := g1.MovePawn(game.Position{2, 2}) //Move Pawn 2
 	//When
 	g3, _ := g2.MovePawn(game.Position{2, 1}) //Move Pawn 1
@@ -355,7 +355,7 @@ func TestOverNoMoreMove(t *testing.T) {
 	setUp()
 	configuration := game.Configuration{3}
 	g, _ := game.NewGame(configuration)
-	g1, _ := g.MovePawn(game.Position{1, 1}) // Move Pawn 1
+	g1, _ := g.MovePawn(game.Position{1, 1})  // Move Pawn 1
 	g2, _ := g1.MovePawn(game.Position{2, 2}) // Move Pawn 2
 	g3, _ := g2.MovePawn(game.Position{2, 1}) // Move Pawn 1
 	//When
@@ -375,7 +375,7 @@ func TestOverNoMoreFenceAddition(t *testing.T) {
 	setUp()
 	configuration := game.Configuration{3}
 	g, _ := game.NewGame(configuration)
-	g1, _ := g.MovePawn(game.Position{1, 1}) // Move Pawn 1
+	g1, _ := g.MovePawn(game.Position{1, 1})  // Move Pawn 1
 	g2, _ := g1.MovePawn(game.Position{2, 2}) // Move Pawn 2
 	g3, _ := g2.MovePawn(game.Position{2, 1}) // Move Pawn 1
 	//When
@@ -386,6 +386,88 @@ func TestOverNoMoreFenceAddition(t *testing.T) {
 		return
 	}
 	if err.Error() != "Game is over, unable to add a fence" {
+		t.Errorf("Not the right error: %s", err.Error())
+	}
+}
+
+func TestJumpPawn(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{3}
+	g, _ := game.NewGame(configuration)
+	g1, _ := g.MovePawn(game.Position{1, 1}) // Move Pawn 1
+	//When
+	g2, _ := g1.MovePawn(game.Position{0, 1}) // Move Pawn 2
+	//Then
+	if !g2.Pawns[1].Position.Equals(game.Position{0, 1}) {
+		t.Error("The pawn should jump opponent")
+	}
+}
+
+func TestJumpLeft(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{3}
+	g, _ := game.NewGame(configuration)
+	g1, _ := g.MovePawn(game.Position{1, 1})                    // Move Pawn 1
+	g2, _ := g1.AddFence(game.Fence{game.Position{0, 0}, true}) // Add Fence Pawn 2
+	//When
+	g3, _ := g2.MovePawn(game.Position{2, 0}) // Jump Left Pawn 1
+	//Then
+	if !g3.Pawns[0].Position.Equals(game.Position{2, 0}) {
+		t.Error("The pawn should jump left opponent")
+	}
+}
+
+func TestJumpLeftImpossibleFence(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{3}
+	g, _ := game.NewGame(configuration)
+	g1, _ := g.MovePawn(game.Position{1, 1})                    // Move Pawn 1
+	g2, _ := g1.AddFence(game.Fence{game.Position{1, 0}, true}) // Add Fence Pawn 2
+	//When
+	_, err := g2.MovePawn(game.Position{2, 0}) // Jump Left Pawn 1
+	//Then
+	if err == nil {
+		t.Error("It is not possible to move to {2 0}")
+		return
+	}
+	if err.Error() != "It is not possible to move to {2 0}" {
+		t.Errorf("Not the right error: %s", err.Error())
+	}
+}
+
+func TestJumpRight(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{3}
+	g, _ := game.NewGame(configuration)
+	g1, _ := g.MovePawn(game.Position{1, 1})                    // Move Pawn 1
+	g2, _ := g1.AddFence(game.Fence{game.Position{0, 0}, true}) // Add Fence Pawn 2
+	//When
+	g3, _ := g2.MovePawn(game.Position{2, 2}) // Jump Right Pawn 1
+	//Then
+	if !g3.Pawns[0].Position.Equals(game.Position{2, 2}) {
+		t.Error("The pawn should jump right opponent")
+	}
+}
+
+func TestJumpRightImpossibleRight(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{3}
+	g, _ := game.NewGame(configuration)
+	g1, _ := g.MovePawn(game.Position{1, 1})                    // Move Pawn 1
+	g2, _ := g1.AddFence(game.Fence{game.Position{1, 1}, true}) // Add Fence Pawn 2
+	//When
+	_, err := g2.MovePawn(game.Position{2, 2}) // Jump Right Pawn 1
+	//Then
+	if err == nil {
+		t.Error("It is not possible to move to {2 2}")
+		return
+	}
+	if err.Error() != "It is not possible to move to {2 2}" {
 		t.Errorf("Not the right error: %s", err.Error())
 	}
 }
