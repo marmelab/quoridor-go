@@ -264,3 +264,76 @@ func (g Game) setCurrentPawnPosition(newPosition Position) Game {
 	g.Pawns[g.PawnTurn-1].Position = newPosition
 	return g
 }
+
+type BoardItem int
+
+const (
+	SQUARE BoardItem = 0
+	NO_FENCE BoardItem = 1
+	FENCE BoardItem = 2
+	PAWN_1 BoardItem = 3
+	PAWN_2 BoardItem = 4
+)
+
+func (g Game) GetTextBoard() string {
+	board:= g.buildBoard()
+
+	lines := ""
+	for i := 0; i < len(board); i++ {
+		line := " "
+		for j := 0; j < len(board); j++ {
+			if board[i][j] == SQUARE {
+				line += "\u25a1 "
+			} else if board[i][j] == NO_FENCE {
+				line += "  "
+			} else if board[i][j] == FENCE {
+				line += "\u25fc "
+			} else if board[i][j] == PAWN_1 {
+				line += "\u25b2 "
+			} else if board[i][j] == PAWN_2 {
+				line += "\u25b3 "
+			}
+		}
+		lines += line + "\n"
+	}
+	return lines
+}
+
+func isOdd(number int) bool {
+	return number % 2 != 0
+}
+
+func (g Game) buildBoard() [][]BoardItem {
+	boardSize := g.Board.BoardSize * 2 - 1
+	board := make([][]BoardItem, boardSize)
+	for i := 0; i < boardSize; i++ {
+		board[i] = make([]BoardItem, boardSize)
+	}
+	for i := 0; i < boardSize; i++ {
+		for j := 0; j < boardSize; j++ {
+			if isOdd(i) || isOdd(j) {
+				board[i][j] = NO_FENCE
+			}
+		}
+	}
+	for _, fence := range g.Fences {
+		position := fence.NWSquare
+		row := position.Row * 2
+		col := position.Column * 2
+		if fence.Horizontal {
+			board[row + 1][col] = FENCE
+			board[row + 1][col + 1] = FENCE
+			board[row + 1][col + 2] = FENCE
+		} else {
+			board[row][col + 1] = FENCE
+			board[row + 1][col + 1] = FENCE
+			board[row + 2][col + 1] = FENCE
+		}
+	}
+	pawnNumber := PAWN_1
+	for _, pawn := range g.Pawns {
+		board[pawn.Position.Row * 2][pawn.Position.Column * 2] = pawnNumber
+		pawnNumber++ 
+	}
+	return board
+}
