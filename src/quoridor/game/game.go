@@ -132,7 +132,7 @@ func (g Game) MovePawn(destination Position) (Game, error) {
 	if !g.Board.IsInBoard(destination) {
 		return Game{}, errors.New("The new position is not inside the board")
 	}
-	moves := g.getPossibleMoves()
+	moves := g.GetPossibleMoves()
 	if moves.IndexOf(destination) == -1 {
 		return Game{}, fmt.Errorf("It is not possible to move to %v", destination)
 	}
@@ -146,7 +146,7 @@ func (g Game) MovePawn(destination Position) (Game, error) {
 	return g, nil
 }
 
-func (g Game) getPossibleMoves() Positions {
+func (g Game) GetPossibleMoves() Positions {
 	positions := Positions{}
 
 	northMove := Move{Position{0, -1}, Position{-1, 0}, Position{1, 0}}
