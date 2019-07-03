@@ -7,13 +7,15 @@ import (
 	"quoridor/storage"
 )
 
-const (
-	UnknownPlayer = 0
-)
+type Player struct {
+	number int
+	fencesLeft int
+}
 
 type Party struct {
+	conf game.Configuration
 	game game.Game
-	players map[string]int
+	players map[string]Player
 }
 
 func (p Party) isReady() bool {
@@ -28,28 +30,38 @@ func findPartyByGameID(id string) (Party, error) {
 	return p.(Party), nil
 }
 
-func checkPlayerCanPlay(p Party, playerToken string) error {
-	player := p.players[playerToken]
-	if player == UnknownPlayer {
+func (p Party) checkPlayerCanPlay(playerToken string) error {
+	player, ok := p.getPlayer(playerToken)
+	if !ok {
 		return errors.New("Forbidden")
 	}
 	if !p.isReady() {
 		return errors.New("Game is not ready")
 	}
-	if player != p.game.PawnTurn {
+	if player.number != p.game.PawnTurn {
 		return errors.New("It is not your turn")
 	}
 	return nil
 }
 
+func (p Party) getPlayer(playerToken string) (Player, bool) {
+	player, found := p.players[playerToken]
+	return player, found
+}
+
+func (p Party) savePlayer(playerToken string, player Player) Party {
+	p.players[playerToken] = player
+	return p
+}
+
 // CreateGame create a game with the default configuration
 func CreateGame(conf game.Configuration) (*game.Game, error) {
-	game, err := game.NewGame(conf)
+	game, err := game.NewGame(conf.BoardSize)
 	if err != nil {
 		return nil, err
 	}
-	players := make(map[string]int)
-	storage.Set(game.ID, Party{game, players})
+	players := make(map[string]Player)
+	storage.Set(game.ID, Party{conf, game, players})
 	return &game, nil
 }
 
@@ -71,7 +83,8 @@ func JoinGame(gameID string, playerToken string) error {
 	if p.isReady() {
 		return errors.New("Game is already set")
 	}
-	p.players[playerToken] = len(p.players) + 1
+	newPlayer := Player{len(p.players) + 1, p.conf.NumberOfFencesPerPawnPlayer}
+	p = p.savePlayer(playerToken, newPlayer)
 	storage.Set(p.game.ID, p)
 	return nil
 }
@@ -82,14 +95,20 @@ func AddFence(gameID string, fence game.Fence, playerToken string) (game.Game, e
 	if err != nil {
 		return game.Game{}, err
 	}
-	errPlayer := checkPlayerCanPlay(p, playerToken)
+	errPlayer := p.checkPlayerCanPlay(playerToken)
 	if errPlayer != nil {
 		return game.Game{}, errPlayer
+	}
+	player := p.players[playerToken]
+	if player.fencesLeft == 0 {
+		return game.Game{}, errors.New("No more fences to add")
 	}
 	g, errFence := p.game.AddFence(fence)
 	if errFence != nil {
 		return game.Game{}, errFence
 	}
+	player.fencesLeft--
+	p = p.savePlayer(playerToken, player)
 	p.game = g
 	storage.Set(p.game.ID, p)
 	return g, nil
@@ -157,7 +176,7 @@ func MovePawn(gameID string, destination game.Position, playerToken string) (gam
 	if err != nil {
 		return game.Game{}, err
 	}
-	errPlayer := checkPlayerCanPlay(p, playerToken)
+	errPlayer := p.checkPlayerCanPlay(playerToken)
 	if errPlayer != nil {
 		return game.Game{}, errPlayer
 	}
