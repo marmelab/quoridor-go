@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"quoridor/controller"
+	"quoridor/game"
 	"quoridor/server/request"
 	"quoridor/server/response"
 
@@ -32,7 +33,7 @@ type AuthorizationToken struct {
 func Start() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", welcomeHandler).Methods("GET")
-	router.HandleFunc("/games", createGameHandler).Methods("POST")
+	router.HandleFunc("/games", CreateGameHandler).Methods("POST")
 	router.HandleFunc("/games/{gameId}", getGameHandler).Methods("GET")
 	router.HandleFunc("/games/{gameId}/join", joinGameHandler).Methods("PUT")
 	router.HandleFunc("/games/{gameId}/add-fence", addFenceHandler).Methods("PUT")
@@ -52,7 +53,7 @@ func welcomeHandler(w http.ResponseWriter, r *http.Request) {
 	response.SendOK(w, Message{"Welcome to the Quoridor API!"})
 }
 
-func createGameHandler(w http.ResponseWriter, r *http.Request) {
+func CreateGameHandler(w http.ResponseWriter, r *http.Request) {
 	configuration, err := request.GetGameConfiguration(r)
 	if err != nil {
 		response.SendBadRequestError(w, err)
@@ -63,7 +64,7 @@ func createGameHandler(w http.ResponseWriter, r *http.Request) {
 		response.SendBadRequestError(w, err)
 		return
 	}
-	response.SendOK(w, game)
+	sendGameRepresentation(w, r, *game)
 }
 
 func getGameHandler(w http.ResponseWriter, r *http.Request) {
@@ -73,7 +74,7 @@ func getGameHandler(w http.ResponseWriter, r *http.Request) {
 		response.SendBadRequestError(w, err)
 		return
 	}
-	response.SendOK(w, game)
+	sendGameRepresentation(w, r, game)
 }
 
 func joinGameHandler(w http.ResponseWriter, r *http.Request) {
@@ -100,7 +101,7 @@ func addFenceHandler(w http.ResponseWriter, r *http.Request) {
 		response.SendBadRequestError(w, err)
 		return
 	}
-	response.SendOK(w, game)
+	sendGameRepresentation(w, r, game)
 }
 
 func getFencePossibilitiesHandler(w http.ResponseWriter, r *http.Request) {
@@ -126,7 +127,7 @@ func movePawnHandler(w http.ResponseWriter, r *http.Request) {
 		response.SendBadRequestError(w, err)
 		return
 	}
-	response.SendOK(w, game)
+	sendGameRepresentation(w, r, game)
 }
 
 func getMovePossibilitiesHandler(w http.ResponseWriter, r *http.Request) {
@@ -137,4 +138,13 @@ func getMovePossibilitiesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	response.SendOK(w, possibilities)
+}
+
+func sendGameRepresentation(w http.ResponseWriter, r *http.Request, game game.Game) {
+	accept := r.Header.Get("Accept")
+	if accept == "text/plain" {
+		response.SendPlainOK(w, game.GetTextBoard())
+		return
+	}
+	response.SendOK(w, game)
 }
