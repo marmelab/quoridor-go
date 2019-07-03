@@ -10,6 +10,19 @@ func setUp() {
 	storage.Init()
 }
 
+func checkMoves(t *testing.T, moves game.Positions, expected game.Positions) {
+	if len(moves) != len(expected) {
+		t.Errorf("Pawn can move in %v squares", len(moves))
+		return
+	}
+	for _, pos := range expected {
+		if moves.IndexOf(pos) == -1 {
+			t.Errorf("Moves should contain %v but not present in %v", pos, moves)
+			return
+		}
+	}
+}
+
 func TestAddFenceShouldAddTheFenceAtTheRightPlace(t *testing.T) {
 	//Given
 	setUp()
@@ -470,4 +483,29 @@ func TestJumpRightImpossibleRight(t *testing.T) {
 	if err.Error() != "It is not possible to move to {2 2}" {
 		t.Errorf("Not the right error: %s", err.Error())
 	}
+}
+
+
+func TestGetPossibleMoves(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{3}
+	g, _ := game.NewGame(configuration)
+	//When
+	moves := g.GetPossibleMoves()
+	//Then
+	checkMoves(t, moves, game.Positions{game.Position{0, 0}, game.Position{1, 1}, game.Position{0, 2}})
+}
+
+func TestGetPossibleMovesWithFenceAndJump(t *testing.T) {
+	//Given
+	setUp()
+	configuration := game.Configuration{3}
+	g, _ := game.NewGame(configuration)
+	g1, _ := g.MovePawn(game.Position{1, 1})                    // Move Pawn 1
+	g2, _ := g1.AddFence(game.Fence{game.Position{1, 1}, true}) // Add Fence Pawn 2
+	//When
+	moves := g2.GetPossibleMoves()
+	//Then
+	checkMoves(t, moves, game.Positions{game.Position{1, 0}, game.Position{2, 0}, game.Position{0, 1}})
 }

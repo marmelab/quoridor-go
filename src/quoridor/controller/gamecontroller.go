@@ -169,3 +169,11 @@ func MovePawn(gameID string, destination game.Position, playerToken string) (gam
 	storage.Set(p.game.ID, p)
 	return g, nil
 }
+
+func GetMovePossibilities(gameID string) ([]game.Position, error) {
+	g, err := GetGame(gameID)
+	if err != nil {
+		return []game.Position{}, err
+	}
+	return g.GetPossibleMoves(), nil
+}
