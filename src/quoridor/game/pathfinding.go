@@ -31,7 +31,7 @@ func Path(board Board, fences []Fence, src Position, dest Positions) int {
         ps:= NewPositionSquare(pos)
         positions := [4]Position{ps.EastPosition, ps.NorthPosition, ps.SouthPosition, ps.WestPosition}
         for _, position := range positions {
-            if board.IsInBoard(position) && !visited[position.Column][position.Row] && CanMove(pos, position, fences, Pawns{}) {
+            if board.IsInBoard(position) && !visited[position.Column][position.Row] && CanCross(pos, position, fences) {
                 visited[position.Column][position.Row] = true
                 adjPosition := QueueNode{Position{position.Column, position.Row}, curr.Distance + 1 }
                 q.PushBack(adjPosition)

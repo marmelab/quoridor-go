@@ -4,17 +4,25 @@ import (
 	"errors"
 	"fmt"
 
+	"quoridor/exception"
+
 	"github.com/lithammer/shortuuid"
 )
 
-// Game is the controller  
+type Move struct {
+	to Position
+	jumpLeft Position
+	jumpRight Position
+}
+
+// Game is the controller
 type Game struct {
-	ID string `json:"id"`
-	Over bool `json:"over"`
-	PawnTurn int `json:"pawnTurn"`
-	Pawns []Pawn  `json:"pawn"`
-	Fences []Fence `json:"fences"`
-	Board *Board `json:"board"`
+	ID       string  `json:"id"`
+	Over     bool    `json:"over"`
+	PawnTurn int     `json:"pawnTurn"`
+	Pawns    []Pawn  `json:"pawn"`
+	Fences   []Fence `json:"fences"`
+	Board    *Board  `json:"board"`
 }
 
 // NewGame create a new game depending on the configuration
@@ -29,7 +37,7 @@ func NewGame(conf Configuration) (Game, error) {
 		Pawn{Position{0, lineCenter}, EAST},
 		Pawn{Position{boardSize - 1, lineCenter}, WEST},
 	}
-	id:= shortuuid.New()
+	id := shortuuid.New()
 	return Game{id, false, 1, pawns, []Fence{}, board}, nil
 }
 
@@ -69,7 +77,7 @@ func (g Game) hasAlreadyAFenceAtTheSamePosition(p Position) bool {
 }
 
 func (g Game) hasNeighbourFence(isHorizontal bool, ps PositionSquare) bool {
-	if (isHorizontal) {
+	if isHorizontal {
 		for i := range g.Fences {
 			fence := g.Fences[i]
 			pos := fence.NWSquare
@@ -95,9 +103,9 @@ func (g Game) IsCrossable(fence Fence) bool {
 	for i := range g.Pawns {
 		pawn := g.Pawns[i]
 		destinations := g.getGoalLine(pawn)
-		 if Path(*g.Board, fences, pawn.Position, destinations) == -1 {
+		if Path(*g.Board, fences, pawn.Position, destinations) == -1 {
 			return false
-		 }
+		}
 	}
 	return true
 }
@@ -124,17 +132,13 @@ func (g Game) MovePawn(destination Position) (Game, error) {
 	if !g.Board.IsInBoard(destination) {
 		return Game{}, errors.New("The new position is not inside the board")
 	}
-	from := g.getCurrentPawn().Position
-	direction := GetDirection(from, destination)
-	if (direction == UNKNOWN) {
-		return Game{}, fmt.Errorf("It is not possible to reach %v", destination)
-	}
-	if !CanMove(from, destination, g.Fences, g.Pawns) {
+	moves := g.getPossibleMoves()
+	if moves.IndexOf(destination) == -1 {
 		return Game{}, fmt.Errorf("It is not possible to move to %v", destination)
 	}
 	g = g.setCurrentPawnPosition(destination)
 	over, err := g.isOver()
-	if (err != nil) {
+	if err != nil {
 		return Game{}, err
 	}
 	g.Over = over
@@ -142,10 +146,103 @@ func (g Game) MovePawn(destination Position) (Game, error) {
 	return g, nil
 }
 
+func (g Game) getPossibleMoves() Positions {
+	positions := Positions{}
+
+	northMove := Move{Position{0, -1}, Position{-1, 0}, Position{1, 0}}
+	northPositions := g.getDirectionPossibleMoves(northMove)
+	positions = positions.appendIfNotPresent(northPositions)
+
+	eastMove := Move{Position{1, 0}, Position{0, -1}, Position{0, 1}}
+	eastPositions := g.getDirectionPossibleMoves(eastMove)
+	positions = positions.appendIfNotPresent(eastPositions)
+
+	southMove := Move{Position{0, 1}, Position{-1, 0}, Position{1, 0}}
+	southPositions := g.getDirectionPossibleMoves(southMove)
+	positions = positions.appendIfNotPresent(southPositions)
+
+	westMove := Move{Position{-1, 0}, Position{0, -1}, Position{0, 1}}
+	westPositions := g.getDirectionPossibleMoves(westMove)
+	positions = positions.appendIfNotPresent(westPositions)
+	return positions
+}
+
+func (g Game) getDirectionPossibleMoves(move Move) Positions {
+	positions := Positions{}
+	from := g.getCurrentPawn().Position
+	toPosition, err := g.getPossiblePosition(from, move.to.Column, move.to.Row)
+	if err != nil && !exception.MatchGameError(err, exception.OPPONENT) {
+		return positions
+	}
+
+	if err == nil {
+		positions = append(positions, toPosition)
+		return positions
+	}
+	toPosition = from.Copy(move.to.Column, move.to.Row)
+	jumpPosition, errJump := g.getPossiblePosition(toPosition, move.to.Column, move.to.Row)
+	if errJump == nil {
+		positions = append(positions, jumpPosition)
+		return positions
+	}
+	jumpLeftPosition, errLeftJump := g.getPossiblePosition(toPosition, move.jumpLeft.Column, move.jumpLeft.Row)
+	if errLeftJump == nil {
+		positions = append(positions, jumpLeftPosition)
+	}
+	jumpRightPosition, errRightJump := g.getPossiblePosition(toPosition, move.jumpRight.Column, move.jumpRight.Row)
+	if errRightJump == nil {
+		positions = append(positions, jumpRightPosition)
+	}
+	return positions
+}
+
+func (g Game) getPossiblePosition(from Position, col, row int) (Position, error) {
+	to := from.Copy(col, row)
+	if !g.Board.IsInBoard(to) {
+		return Position{}, exception.New(exception.OUTSIDE_BOARD, "Outside")
+	}
+	if !CanCross(from, to, g.Fences) {
+		return Position{}, exception.New(exception.NO_MOVE, "NotCrossable")
+	}
+	if !isPositionFree(to, g.Pawns) {
+		return Position{}, exception.New(exception.OPPONENT, "Opponent")
+	}
+	return to, nil
+}
+
+func isPositionFree(position Position, pawns Pawns) bool {
+	return pawns.IndexOf(position) == -1
+}
+
+func CanCross(from Position, to Position, fences Fences) bool {
+	direction := GetDirection(from, to)
+	if direction == UNKNOWN {
+		return false
+	}
+	var fence1, fence2 Fence
+	switch direction {
+	case EAST:
+		fence1 = Fence{Position{from.Column, from.Row - 1}, false}
+		fence2 = Fence{Position{from.Column, from.Row}, false}
+	case WEST:
+		fence1 = Fence{Position{from.Column - 1, from.Row - 1}, false}
+		fence2 = Fence{Position{from.Column - 1, from.Row}, false}
+	case NORTH:
+		fence1 = Fence{Position{from.Column - 1, from.Row - 1}, true}
+		fence2 = Fence{Position{from.Column, from.Row - 1}, true}
+	case SOUTH:
+		fence1 = Fence{Position{from.Column - 1, from.Row}, true}
+		fence2 = Fence{Position{from.Column, from.Row}, true}
+	default:
+		panic("Unknown direction")
+	}
+	return !fences.Contains(fence1, fence2)
+}
+
 func (g Game) isOver() (bool, error) {
 	pawn := g.getCurrentPawn()
 	if pawn.Goal == EAST {
-		return pawn.Position.Column == g.Board.BoardSize - 1, nil
+		return pawn.Position.Column == g.Board.BoardSize-1, nil
 	}
 	if pawn.Goal == WEST {
 		return pawn.Position.Column == 0, nil
@@ -154,17 +251,17 @@ func (g Game) isOver() (bool, error) {
 }
 
 func (g Game) getNextPawnTurn() int {
-	if g.PawnTurn + 1 > len(g.Pawns) {
+	if g.PawnTurn+1 > len(g.Pawns) {
 		return 1
 	}
 	return g.PawnTurn + 1
 }
 
 func (g Game) getCurrentPawn() Pawn {
-	return g.Pawns[g.PawnTurn -1]
+	return g.Pawns[g.PawnTurn-1]
 }
 
 func (g Game) setCurrentPawnPosition(newPosition Position) Game {
-	g.Pawns[g.PawnTurn -1].Position = newPosition
+	g.Pawns[g.PawnTurn-1].Position = newPosition
 	return g
 }
