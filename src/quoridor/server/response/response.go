@@ -26,3 +26,7 @@ func SendBadRequestError(w http.ResponseWriter, err error) {
 func SendBadRequest(w http.ResponseWriter, message string) {
 	http.Error(w, "{ \"message\": \""+message+"\"}", http.StatusBadRequest)
 }
+
+func SendNotFound(w http.ResponseWriter) {
+	http.Error(w, "", http.StatusNotFound)
+}

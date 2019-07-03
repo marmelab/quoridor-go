@@ -32,9 +32,9 @@ type AuthorizationToken struct {
 // Start launch the server
 func Start() {
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/", welcomeHandler).Methods("GET")
+	router.HandleFunc("/", WelcomeHandler).Methods("GET")
 	router.HandleFunc("/games", CreateGameHandler).Methods("POST")
-	router.HandleFunc("/games/{gameId}", getGameHandler).Methods("GET")
+	router.HandleFunc("/games/{gameId}", GetGameHandler).Methods("GET")
 	router.HandleFunc("/games/{gameId}/join", joinGameHandler).Methods("PUT")
 	router.HandleFunc("/games/{gameId}/add-fence", addFenceHandler).Methods("PUT")
 	router.HandleFunc("/games/{gameId}/add-fence/possibilities", getFencePossibilitiesHandler).Methods("GET")
@@ -49,7 +49,7 @@ func getListeningPort() string {
 	return strconv.Itoa(Port)
 }
 
-func welcomeHandler(w http.ResponseWriter, r *http.Request) {
+func WelcomeHandler(w http.ResponseWriter, r *http.Request) {
 	response.SendOK(w, Message{"Welcome to the Quoridor API!"})
 }
 
@@ -67,11 +67,11 @@ func CreateGameHandler(w http.ResponseWriter, r *http.Request) {
 	sendGameRepresentation(w, r, *game)
 }
 
-func getGameHandler(w http.ResponseWriter, r *http.Request) {
+func GetGameHandler(w http.ResponseWriter, r *http.Request) {
 	id := request.GetGameID(r)
 	game, err := gamecontroller.GetGame(id)
 	if err != nil {
-		response.SendBadRequestError(w, err)
+		response.SendNotFound(w)
 		return
 	}
 	sendGameRepresentation(w, r, game)
