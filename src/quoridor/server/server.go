@@ -11,13 +11,14 @@ import (
 	"quoridor/server/request"
 	"quoridor/server/response"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/lithammer/shortuuid"
 )
 
 // Port is the default server port
 const (
-	Port = 8383
+	Port                    = 8383
 	AuthorizationHeaderName = "Authorization"
 )
 
@@ -32,24 +33,30 @@ type AuthorizationToken struct {
 // Start launch the server
 func Start() {
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/", welcomeHandler).Methods("GET")
+
+	router.HandleFunc("/", WelcomeHandler).Methods(http.MethodGet)
 	router.HandleFunc("/games", CreateGameHandler).Methods("POST")
-	router.HandleFunc("/games/{gameId}", getGameHandler).Methods("GET")
-	router.HandleFunc("/games/{gameId}/join", joinGameHandler).Methods("PUT")
-	router.HandleFunc("/games/{gameId}/add-fence", addFenceHandler).Methods("PUT")
-	router.HandleFunc("/games/{gameId}/add-fence/possibilities", getFencePossibilitiesHandler).Methods("GET")
-	router.HandleFunc("/games/{gameId}/move-pawn", movePawnHandler).Methods("PUT")
-	router.HandleFunc("/games/{gameId}/move-pawn/possibilities", getMovePossibilitiesHandler).Methods("GET")
+	router.HandleFunc("/games/{gameId}", GetGameHandler).Methods(http.MethodGet)
+	router.HandleFunc("/games/{gameId}/join", joinGameHandler).Methods(http.MethodPut)
+	router.HandleFunc("/games/{gameId}/add-fence", addFenceHandler).Methods(http.MethodPut)
+	router.HandleFunc("/games/{gameId}/add-fence/possibilities", getFencePossibilitiesHandler).Methods(http.MethodGet)
+	router.HandleFunc("/games/{gameId}/move-pawn", movePawnHandler).Methods(http.MethodPut)
+	router.HandleFunc("/games/{gameId}/move-pawn/possibilities", getMovePossibilitiesHandler).Methods(http.MethodGet)
+
 	port := getListeningPort()
 	fmt.Printf("Server started on port: %v\n", port)
-	log.Fatal(http.ListenAndServe(":"+port, router))
+
+	allowedHeaders := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+	allowedOrigins := handlers.AllowedOrigins([]string{"*"})
+	allowedMethods := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+	log.Fatal(http.ListenAndServe(":"+port, handlers.CORS(allowedHeaders, allowedMethods, allowedOrigins)(router)))
 }
 
 func getListeningPort() string {
 	return strconv.Itoa(Port)
 }
 
-func welcomeHandler(w http.ResponseWriter, r *http.Request) {
+func WelcomeHandler(w http.ResponseWriter, r *http.Request) {
 	response.SendOK(w, Message{"Welcome to the Quoridor API!"})
 }
 
@@ -67,11 +74,11 @@ func CreateGameHandler(w http.ResponseWriter, r *http.Request) {
 	sendGameRepresentation(w, r, *game)
 }
 
-func getGameHandler(w http.ResponseWriter, r *http.Request) {
+func GetGameHandler(w http.ResponseWriter, r *http.Request) {
 	id := request.GetGameID(r)
 	game, err := gamecontroller.GetGame(id)
 	if err != nil {
-		response.SendBadRequestError(w, err)
+		response.SendNotFound(w)
 		return
 	}
 	sendGameRepresentation(w, r, game)
@@ -79,7 +86,7 @@ func getGameHandler(w http.ResponseWriter, r *http.Request) {
 
 func joinGameHandler(w http.ResponseWriter, r *http.Request) {
 	id := request.GetGameID(r)
-	authToken:= shortuuid.New()
+	authToken := shortuuid.New()
 	err := gamecontroller.JoinGame(id, authToken)
 	if err != nil {
 		response.SendBadRequestError(w, err)

@@ -15,6 +15,7 @@ func GetGameID(r *http.Request) string {
 
 func GetGameConfiguration(r *http.Request) (game.Configuration, error) {
 	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
 	defer r.Body.Close()
 	var conf game.Configuration
 	err := decoder.Decode(&conf)
@@ -28,6 +29,7 @@ func GetGameConfiguration(r *http.Request) (game.Configuration, error) {
 
 func GetFence(r *http.Request) (game.Fence, error) {
 	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
 	defer r.Body.Close()
 	var fence game.Fence
 	err := decoder.Decode(&fence)
@@ -39,6 +41,7 @@ func GetFence(r *http.Request) (game.Fence, error) {
 
 func GetPosition(r *http.Request) (game.Position, error) {
 	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
 	defer r.Body.Close()
 	var position game.Position
 	err := decoder.Decode(&position)

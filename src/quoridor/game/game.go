@@ -20,7 +20,7 @@ type Game struct {
 	ID       string  `json:"id"`
 	Over     bool    `json:"over"`
 	PawnTurn int     `json:"pawnTurn"`
-	Pawns    []Pawn  `json:"pawn"`
+	Pawns    []Pawn  `json:"pawns"`
 	Fences   []Fence `json:"fences"`
 	Board    *Board  `json:"board"`
 }
@@ -141,7 +141,9 @@ func (g Game) MovePawn(destination Position) (Game, error) {
 		return Game{}, err
 	}
 	g.Over = over
-	g.PawnTurn = g.getNextPawnTurn()
+	if ! over {
+		g.PawnTurn = g.getNextPawnTurn()
+	}
 	return g, nil
 }
 
@@ -333,7 +335,7 @@ func (g Game) buildBoard() [][]BoardItem {
 	pawnNumber := PAWN_1
 	for _, pawn := range g.Pawns {
 		board[pawn.Position.Row * 2][pawn.Position.Column * 2] = pawnNumber
-		pawnNumber++ 
+		pawnNumber++
 	}
 	return board
 }

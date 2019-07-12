@@ -83,7 +83,7 @@ func JoinGame(gameID string, playerToken string) error {
 	if p.isReady() {
 		return errors.New("Game is already set")
 	}
-	newPlayer := Player{len(p.players) + 1, p.conf.NumberOfFencesPerPawnPlayer}
+	newPlayer := Player{len(p.players) + 1, p.conf.NumberOfFencesPerPlayer}
 	p = p.savePlayer(playerToken, newPlayer)
 	storage.Set(p.game.ID, p)
 	return nil
